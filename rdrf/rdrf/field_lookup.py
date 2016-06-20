@@ -269,6 +269,11 @@ class FieldFactory(object):
             logger.info("could not locate widget from widget string: %s" % widget_string)
 
     def create_field(self):
+        field = self._create_field()
+        field.cde = self.cde
+        return field
+
+    def _create_field(self):
         """
         :param cde: Common Data Element instance
         :return: A field object ( with widget possibly)
@@ -353,14 +358,18 @@ class FieldFactory(object):
                             options["choices"] = options['choices'][1:]
 
                     if self.cde.code in [
-                            "State",
-                            "Country",
                             "CDEPatientNextOfKinState",
                             "CDEPatientNextOfKinCountry"]:
                         # These are dynamic now and alter their reange lists dynamically so have
                         # to switch off validation
                         from rdrf.fields import ChoiceFieldNoValidation
                         return ChoiceFieldNoValidation(**options)
+
+                    if self.cde.code in ['State', 'Country']:
+                        # because these are dynamic lookup fields the usual validation wasn't working
+                        from rdrf.fields import ChoiceFieldNonBlankValidation
+                        return ChoiceFieldNonBlankValidation(**options)
+                        
 
                     return django.forms.ChoiceField(**options)
         else:

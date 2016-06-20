@@ -6,10 +6,10 @@ from rdrf.utils import get_code, mongo_db_name, models_from_mongo_key, is_delimi
 from rdrf.utils import is_file_cde, is_uploaded_file, is_gridfs_file_wrapper
 
 from django.conf import settings
-import datetime
+from datetime import datetime
 from rdrf.file_upload import FileUpload
 from copy import deepcopy
-
+from operator import itemgetter
 
 
 
@@ -294,7 +294,6 @@ class FormDataParser(object):
         self.parse_all_forms = parse_all_forms
 
     def update_timestamps(self, form_model):
-        from datetime import datetime
         t = datetime.now()
         form_timestamp = form_model.name + "_timestamp"
         self.global_timestamp = t
@@ -532,8 +531,8 @@ class DynamicDataWrapper(object):
     def _set_client(self):
         if self.client is None:
             self.client = construct_mongo_client()
-            
-        
+
+
 
     def __unicode__(self):
         return "Dynamic Data Wrapper for %s id=%s" % self.obj.__class__.__name__, self.obj.pk
@@ -618,6 +617,41 @@ class DynamicDataWrapper(object):
             return flattened_data
         else:
             return nested_data
+
+    def get_cde_val(self, registry_code, form_name, section_code, cde_code):
+        data = self.load_dynamic_data(registry_code, "cdes", flattened=False)
+        return self._find_cde_val(data, registry_code, form_name, section_code, cde_code)
+
+    @staticmethod
+    def _find_cde_val(record, registry_code, form_name, section_code, cde_code):
+        form_map = {f.get("name"): f for f in record.get("forms", [])}
+        sections = form_map.get(form_name, {}).get("sections", [])
+        section_map = {s.get("code"): s for s in sections}
+        cdes = section_map.get(section_code, {}).get("cdes", [])
+        cde_map = {c.get("code"): c for c in cdes}
+        return cde_map.get(cde_code, {}).get("value")
+
+    def get_cde_history(self, registry_code, form_name, section_code, cde_code):
+        def fmt(snapshot):
+            return {
+                "timestamp": datetime.strptime(snapshot["timestamp"][:19], "%Y-%m-%d %H:%M:%S"),
+                "value": self._find_cde_val(snapshot["record"], registry_code,
+                                                     form_name, section_code,
+                                                     cde_code),
+                "id": str(snapshot["_id"]),
+            }
+        def collapse_same(snapshots):
+            prev = { "": None }  # nonlocal works in python3
+            def is_different(snap):
+                diff = prev[""] is None or snap["value"] != prev[""]["value"]
+                prev[""] = snap
+                return diff
+            return list(filter(is_different, snapshots))
+        record_query = self._get_record_query(filter_by_context=False)
+        record_query["record_type"] = "snapshot"
+        collection = self._get_collection(registry_code, "history")
+        data = map(fmt, collection.find(record_query))
+        return collapse_same(sorted(data, key=itemgetter("timestamp")))
 
     def load_contexts(self, registry_model):
         self._set_client()
@@ -1011,6 +1045,60 @@ class DynamicDataWrapper(object):
 
         return None
 
+
+    def update_dynamic_data(self, registry_model, mongo_record):
+        logger.info("About to update %s in %s with new mongo_record %s" % (self.obj,
+                                                                           registry_model,
+                                                                           mongo_record))
+        self._set_client()
+        # replace entire mongo record with supplied one
+        # assumes structure correct ..
+        collection = self._get_collection(registry_model.code, "cdes")
+        if "_id" in mongo_record:
+            mongo_id = mongo_record["_id"]
+            logger.info("updating monfgo record for object id %s" % mongo_id)
+            logger.info("record to update = %s" % mongo_record)
+            collection.update({'_id': mongo_id}, {"$set": mongo_record}, upsert=False)
+            logger.info("updated ok")
+        else:
+            logger.info("no object id in record will insert")
+            collection.insert(mongo_record)
+            logger.info("inserted ok")
+
+    def delete_patient_record(self, registry_model, context_id):
+        self._set_client()
+        self.rdrf_context_id = context_id
+        logger.info("delete_patient_record called: patient %s registry %s context %s" % (self.obj,
+                                                                registry_model,
+                                                                context_id))
+
+        # used _only_ when trying to emulate a roll-back to no data after an exception  in questionnaire handling
+        if self.obj.__class__.__name__ != 'Patient':
+            raise Exception("can't delete non-patient record")
+
+        patient_model = self.obj
+
+
+        collection = self._get_collection(registry_model.code, "cdes")
+        logger.debug("collection = %s" % collection)
+        
+        filter = {"django_id": self.obj.pk,
+                 "django_model": 'Patient',
+                 "context_id": context_id}
+
+        logger.info("Deleting patient record from mongo for rollback: %s" % filter)
+        try:
+            collection.remove(filter)
+            logger.info("deleted OK..")
+        except Exception, ex:
+            logger.error("Error deleting record: %s" % ex)
+            
+        
+        
+        
+        
+
+
     def save_dynamic_data(self, registry, collection_name, form_data, multisection=False, parse_all_forms=False,
                           index_map=None,additional_data=None):
         from rdrf.models import Registry
@@ -1020,7 +1108,7 @@ class DynamicDataWrapper(object):
 
         existing_record = self.load_dynamic_data(registry, collection_name, flattened=False)
 
-        form_data["timestamp"] = datetime.datetime.now()
+        form_data["timestamp"] = datetime.now()
 
         if self.current_form_model:
             form_timestamp_key = "%s_timestamp" % self.current_form_model.name
@@ -1078,7 +1166,6 @@ class DynamicDataWrapper(object):
         patient_id = None
         timestamp = None
         try:
-            from datetime import datetime
             timestamp = str(datetime.now())
             patient_id = record['django_id']
             history = self._get_collection(registry_code, "history")
@@ -1188,7 +1275,6 @@ class DynamicDataWrapper(object):
 
     def iter_cdes(self, registry_code):
         data = self.load_dynamic_data(registry_code, "cdes", flattened=False)
-        logger.debug("dynamic data = %s" % data)
         if "forms" in data:
             for form_dict in data["forms"]:
                 for section_dict in form_dict['sections']:
@@ -1211,5 +1297,3 @@ class DynamicDataWrapper(object):
         form_timestamp = collection.find_one(self._get_record_query(), {"timestamp": True})
 
         return form_timestamp
-
-

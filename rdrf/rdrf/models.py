@@ -11,7 +11,7 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 logger = logging.getLogger(__name__)
 
@@ -637,10 +637,10 @@ class CommonDataElement(models.Model):
         default=False, help_text="If a range, indicate whether multiple selections allowed")
     max_length = models.IntegerField(
         blank=True, null=True, help_text="Length of field - only used for character fields")
-    max_value = models.IntegerField(
-        blank=True, null=True, help_text="Only used for numeric fields")
-    min_value = models.IntegerField(
-        blank=True, null=True, help_text="Only used for numeric fields")
+    max_value = models.DecimalField(
+        blank=True, null=True, max_digits=10, decimal_places=2, help_text="Only used for numeric fields")
+    min_value = models.DecimalField(
+        blank=True, null=True, max_digits=10, decimal_places=2, help_text="Only used for numeric fields")
     is_required = models.BooleanField(
         default=False, help_text="Indicate whether field is non-optional")
     pattern = models.CharField(
@@ -676,7 +676,12 @@ class CommonDataElement(models.Model):
             return None
 
     def get_display_value(self, stored_value):
-        if self.pv_group:
+        if stored_value is None:
+            return ""
+        elif stored_value == "NaN":
+            # the DataTable was not escaping this value and interpreting it as NaN
+            return ":NaN"
+        elif self.pv_group:
             # if a range, return the display value
             try:
                 values_dict = self.pv_group.as_dict()
@@ -689,9 +694,7 @@ class CommonDataElement(models.Model):
                 logger.error("bad value for cde %s %s: %s" % (self.code,
                                                               stored_value,
                                                               ex))
-        if stored_value == "NaN":
-            # the DataTable was not escaping this value and interpreting it as NaN 
-            return ":NaN"
+
         return stored_value
 
     def clean(self):
@@ -946,6 +949,16 @@ class QuestionnaireResponse(models.Model):
         wrapper = DynamicDataWrapper(self)
         wrapper._set_client()
         return wrapper.has_data(self.registry.code)
+
+    @property
+    def data(self):
+        # return the filled in questionnaire data
+        from rdrf.dynamic_data import DynamicDataWrapper
+        wrapper = DynamicDataWrapper(self)
+        wrapper._set_client()
+        return wrapper.load_dynamic_data(self.registry.code, "cdes", flattened=False)
+
+        
 
 
 def appears_in(cde, registry, registry_form, section):
@@ -1762,7 +1775,7 @@ class RDRFContext(models.Model):
     registry = models.ForeignKey(Registry)
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     created_at = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     display_name = models.CharField(max_length=80, blank=True, null=True)

@@ -30,6 +30,6 @@ openpyxl
 SQLAlchemy
 django_mailgun
 ccg-django-utils==0.4.2
-django-useraudit
 requests==2.9.1
-django-iprestrict==0.4.1
+django-useraudit==1.1.0
+django-iprestrict==0.4.2

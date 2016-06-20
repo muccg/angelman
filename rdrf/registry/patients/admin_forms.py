@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 from registry.patients.patient_widgets import PatientRelativeLinkWidget
 from django.core.exceptions import ValidationError
-from django.forms.util import ErrorList, ErrorDict
+from django.forms.utils import ErrorDict
 from django.forms.widgets import TextInput, DateInput
 from django.contrib.admin.widgets import AdminFileWidget
 from rdrf.hooking import run_hooks
@@ -27,7 +27,7 @@ from registry.groups.models import WorkingGroup
 
 class PatientDoctorForm(forms.ModelForm):
     OPTIONS = (
-        (None, "---------"),
+        (None, "---"),
         (1, "GP (Primary Care)"),
         (2, "Specialist (Lipid)"),
         (3, "Primary Care"),
@@ -147,6 +147,7 @@ class PatientAddressForm(forms.ModelForm):
 
     country = forms.ComboField(required=True, widget=CountryWidget(attrs={ 'onChange': 'select_country(this);'}))
     state = forms.ComboField(required=True, widget=StateWidget())
+    address = forms.CharField( widget=forms.Textarea(attrs={'rows': 5}) )
 
 
 class PatientConsentFileForm(forms.ModelForm):

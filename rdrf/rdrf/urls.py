@@ -19,6 +19,7 @@ import rdrf.consent_view as consent_view
 from rdrf.registration_rdrf import RdrfRegistrationView
 from rdrf.registry_list_view import RegistryListView
 from rdrf.lookup_views import FamilyLookup
+from rdrf.lookup_views import PatientLookup
 from rdrf.views import RegistryList
 from registry.patients.views import update_session
 from registration.backends.default.views import ActivationView
@@ -104,7 +105,10 @@ urlpatterns = patterns('',
 
                        url(r"^(?P<registry_code>\w+)/forms/print/(?P<form_id>\w+)/(?P<patient_id>\d+)/(?P<context_id>\d+)?$",
                            form_view.FormPrintView.as_view(), name='registry_form_print'),
-                       
+
+                       url(r"^(?P<registry_code>\w+)/forms/(?P<form_id>\w+)/(?P<patient_id>\d+)/(?P<section_code>\w+)/(?P<context_id>\d+)/(?P<cde_code>\w+)/history/?$",
+                           form_view.FormFieldHistoryView.as_view(), name='registry_form_field_history'),
+
                        url(r"^(?P<registry_code>\w+)/?$",
                            registry_view.RegistryView.as_view(), name='registry'),
 
@@ -159,7 +163,7 @@ urlpatterns = patterns('',
 
                        url(r'^(?P<registry_code>\w+)/questionnaire/(?P<questionnaire_context>\w+)?$',
                            form_view.QuestionnaireView.as_view(), name='questionnaire'),
-                       url(r'^(?P<registry_code>\w+)/approval/(?P<questionnaire_response_id>\d+)/?$', form_view.QuestionnaireResponseView.as_view(),
+                       url(r'^(?P<registry_code>\w+)/approval/(?P<questionnaire_response_id>\d+)/?$', form_view.QuestionnaireHandlingView.as_view(),
                            name='questionnaire_response'),
                        url(r'^(?P<registry_code>\w+)/uploads/(?P<gridfs_file_id>\w+)$',
                            form_view.FileUploadView.as_view(), name='file_upload'),
@@ -184,6 +188,7 @@ urlpatterns = patterns('',
 
 
                        url(r'api/familylookup/(?P<reg_code>\w+)/?$', FamilyLookup.as_view(), name="family_lookup"),
+                       url(r'api/patientlookup/(?P<reg_code>\w+)/?$', PatientLookup.as_view(), name="patient_lookup"),
 
 #---- Look-ups URLs -----------------------
                        url(r"^lookup/username/(?P<username>[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4})/?$",
