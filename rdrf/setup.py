@@ -12,17 +12,10 @@ def add_file_for_package(package, subdir, f):
 
 package_scripts = ["rdrf-manage.py"]
 
-packages = ['rdrf',
-            'registry',
-            'registry.common',
-            'registry.patients',
-            'registry.groups',
-            'registry.genetic',
-            'explorer',
+packages = ['angelman',
             ]
 
-for package in ['rdrf', 'registry.common', 'registry.genetic',
-                'registry.groups', 'registry.patients', 'registry.humangenome', 'explorer']:
+for package in ['angelman']:
     package_data[package] = []
     if "." in package:
         base_dir, package_dir = package.split(".")
@@ -46,7 +39,7 @@ for package in ['rdrf', 'registry.common', 'registry.genetic',
     os.chdir(start_dir)
 
 
-setup(name='django-rdrf',
+setup(name='django-angelman',
       version="1.4.0.0",
       packages=packages,
       description='RDRF',
