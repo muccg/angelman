@@ -10,19 +10,11 @@ def add_file_for_package(package, subdir, f):
     # print "%s: %s" % (package, full_path)
     return full_path
 
-package_scripts = ["rdrf-manage.py"]
+packages = [
+    'angelman',
+]
 
-packages = ['rdrf',
-            'registry',
-            'registry.common',
-            'registry.patients',
-            'registry.groups',
-            'registry.genetic',
-            'explorer',
-            ]
-
-for package in ['rdrf', 'registry.common', 'registry.genetic',
-                'registry.groups', 'registry.patients', 'registry.humangenome', 'explorer']:
+for package in ['angelman']:
     package_data[package] = []
     if "." in package:
         base_dir, package_dir = package.split(".")
@@ -46,8 +38,8 @@ for package in ['rdrf', 'registry.common', 'registry.genetic',
     os.chdir(start_dir)
 
 
-setup(name='django-rdrf',
-      version="1.3.1.2",
+setup(name='django-angelman',
+      version="1.6",
       packages=packages,
       description='RDRF',
       long_description='Rare Disease Registry Framework',
@@ -55,5 +47,4 @@ setup(name='django-rdrf',
       author_email='rdrf@ccg.murdoch.edu.au',
       package_data=package_data,
       zip_safe=False,
-      scripts=package_scripts,
       )
