@@ -67,8 +67,7 @@ class BaseParentView(LoginRequiredMixin, View):
             working_group, status = WorkingGroup.objects.get_or_create(
                 name=self._UNALLOCATED_GROUP, registry=registry)
 
-
-
+        return clinician, working_group
 
 
     def set_rdrf_context(self, patient_model, context_id):
@@ -159,9 +158,11 @@ class ParentView(BaseParentView):
 
         use_parent_address = "use_parent_address" in request.POST
 
+        address_type, created = AddressType.objects.get_or_create(type=self._ADDRESS_TYPE)
+
         PatientAddress.objects.create(
             patient=patient,
-            address_type=AddressType.objects.get(description__icontains=self._ADDRESS_TYPE),
+            address_type=address_type,
             address=parent.address if use_parent_address else request.POST["address"],
             suburb=parent.suburb if use_parent_address else request.POST["suburb"],
             state=parent.state if use_parent_address else request.POST["state"],
