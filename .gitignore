@@ -5,6 +5,9 @@ syntax: glob
 data
 build
 dist
+rdrf/rdrf
+rdrf/registry
+rdrf/explorer
 *.rpm
 *.log
 virt_*/*
