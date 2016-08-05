@@ -1,6 +1,6 @@
 #
 FROM muccg/angelman-base
-MAINTAINER https://bitbucket.org/ccgmurdoch/angelman
+MAINTAINER https://github.com/muccg/
 
 ARG ARG_GIT_TAG=next_release
 

@@ -14,10 +14,9 @@ seleniumtesthost:
     - WAIT_FOR_RUNSERVER=1
     - WAIT_FOR_MONGO=1
   volumes_from:
-    - dataselenium      
+    - dataselenium
   external_links:
     - angelman_dbtest_1:db
     - angelman_runservertest_1:web
     - angelman_mongotest_1:mongo
     - angelman_seleniumhub_1:hub
-    - angelman_reportingtest_1:reporting

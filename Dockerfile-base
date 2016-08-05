@@ -1,9 +1,9 @@
 #
 FROM muccg/python-base:debian8-2.7
-MAINTAINER https://bitbucket.org/ccgmurdoch/angelman
+MAINTAINER https://github.com/muccg/
 
 ENV PROJECT_NAME angelman
-ENV PROJECT_SOURCE git@bitbucket.org:ccgmurdoch/angelman.git
+ENV PROJECT_SOURCE git@github.com:muccg/angelman.git
 ENV DEPLOYMENT prod
 ENV PRODUCTION 1
 ENV DEBUG 0

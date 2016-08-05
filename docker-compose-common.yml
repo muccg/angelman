@@ -56,8 +56,6 @@ reporting:
   environment:
     - POSTGRES_USER=rdrfapp
     - POSTGRES_PASSWORD=rdrfapp
-  ports:
-    - "15633:5432"
 
 cache:
   image: memcached:1.4
@@ -72,7 +70,7 @@ triplestore:
     - "10035"
 
 nginx:
-  image: muccg/nginx-uwsgi:1.9
+  image: muccg/nginx-uwsgi:1.10
   ports:
     - "8443:443"
     - "8080:80"
@@ -90,9 +88,9 @@ runserver:
     - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
     - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
     - DJANGO_MAILGUN_API_KEY=${DJANGO_MAILGUN_API_KEY}
-    - DJANGO_MAILGUN_SERVER_NAME=${DJANGO_MAILGUN_SERVER_NAME}
-  ports:
-    - "8000:8000"
+    - REPORTINGDBNAME=reporting
+    - REPORTINGDBUSER=reporting
+    - REPORTINGDBPASSWORD=reporting
 
 uwsgi:
   image: muccg/angelman-dev

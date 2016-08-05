@@ -60,6 +60,7 @@ function defaults {
 
     : ${RUNSERVER:="web"}
     : ${RUNSERVERPORT:="8000"}
+    : ${SELENIUMRUNSERVERPORT:="18000"}
     : ${CACHESERVER:="cache"}
     : ${CACHEPORT:="11211"}
     : ${MEMCACHE:="${CACHESERVER}:${CACHEPORT}"}
@@ -72,7 +73,7 @@ function defaults {
 
 
 function selenium_defaults {
-    : ${RDRF_URL:="http://$DOCKER_ROUTE:$RUNSERVERPORT/"}
+    : ${RDRF_URL:="http://$DOCKER_ROUTE:$SELENIUMRUNSERVERPORT/"}
     #: ${RDRF_BROWSER:="*googlechrome"}
     : ${RDRF_BROWSER:="*firefox"}
 
@@ -81,6 +82,12 @@ function selenium_defaults {
     fi
 
     export RDRF_URL RDRF_BROWSER
+}
+
+
+function _django_check_deploy {
+    echo "running check --deploy"
+    django-admin.py check --deploy --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee /data/uwsgi-check.log
 }
 
 
@@ -98,11 +105,9 @@ function _django_collectstatic {
 
 
 function _django_dev_fixtures {
-    echo "loading rdrf fixture"
-    django-admin.py load_fixture --settings=${DJANGO_SETTINGS_MODULE} --file=rdrf.json
-
-    echo "loading users fixture"
-    django-admin.py load_fixture --settings=${DJANGO_SETTINGS_MODULE} --file=users.json
+    echo "loading DEV fixture"
+    django-admin.py init DEV
+    django-admin.py reloadrules
 }
 
 function _rdrf_import_grdr {
@@ -117,9 +122,10 @@ env | grep -iv PASS | sort
 wait_for_services
 
 # prepare a tarball of build
-if [ "$1" = 'tarball' ]; then
-    echo "[Run] Preparing a tarball of build"
+if [ "$1" = 'releasetarball' ]; then
+    echo "[Run] Preparing a release tarball"
 
+    set -e
     cd /app
     rm -rf /app/*
     echo $GIT_TAG
@@ -128,8 +134,8 @@ if [ "$1" = 'tarball' ]; then
     git ls-remote ${PROJECT_SOURCE} ${GIT_TAG} > .version
 
     # install python deps
-    # Note: Environment vars are used to control the bahviour of pip (use local devpi for instance)
-    pip install ${PIP_OPTS} --upgrade -r rdrf/runtime-requirements.txt
+    # Note: Environment vars are used to control the behaviour of pip (use local devpi for instance)
+    pip install --upgrade -r rdrf/runtime-requirements.txt
     pip install -e rdrf
     set +x
 
@@ -148,6 +154,7 @@ if [ "$1" = 'uwsgi' ]; then
 
     _django_collectstatic
     _django_migrate
+    _django_check_deploy
 
     exec uwsgi --die-on-term --ini ${UWSGI_OPTS}
 fi
@@ -162,6 +169,7 @@ if [ "$1" = 'uwsgi_fixtures' ]; then
     _django_collectstatic
     _django_migrate
     _django_dev_fixtures
+    _django_check_deploy
 
     exec uwsgi --die-on-term --ini ${UWSGI_OPTS}
 fi
@@ -207,6 +215,7 @@ fi
 # lettuce entrypoint
 if [ "$1" = 'lettuce' ]; then
     echo "[Run] Starting lettuce"
+    selenium_defaults
     exec django-admin.py run_lettuce --with-xunit --xunit-file=/data/tests.xml
 fi
 

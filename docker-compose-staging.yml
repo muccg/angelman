@@ -19,7 +19,7 @@ mongostaging:
     service: mongo
 
 uwsgistaging:
-  build: docker/unstable
+  image: muccg/angelman:next_release
   command: uwsgi
   environment:
     - DBSERVER=dbstaging

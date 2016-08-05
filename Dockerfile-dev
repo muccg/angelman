@@ -1,6 +1,6 @@
 #
 FROM muccg/angelman-build
-MAINTAINER https://bitbucket.org/ccgmurdoch/angelman
+MAINTAINER https://github.com/muccg/
 
 # At build time changing these args allow us to use a local devpi mirror
 # Unchanged, these defaults allow pip to behave as normal

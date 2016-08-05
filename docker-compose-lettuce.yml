@@ -9,12 +9,15 @@ lettucehost:
   image: muccg/angelman-dev
   command: lettuce
   environment:
-    - WAIT_FOR_WEB=1
+    - DBUSER=rdrfapp
+    - WAIT_FOR_RUNSERVER=1
+    - WAIT_FOR_DB=1
+    - WAIT_FOR_MONGO=1
   volumes_from:
     - dataselenium      
   external_links:
-    - angelman_dbselenium_1:db
-    - angelman_runserverselenium_1:web
-    - angelman_mongoselenium_1:mongo
+    - angelman_runservertest_1:web
     - angelman_seleniumhub_1:hub
-    - angelman_reportingselenium_1:reporting
+    - angelman_dbtest_1:db
+    - angelman_mongotest_1:mongo
+
