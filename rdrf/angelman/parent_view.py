@@ -88,7 +88,7 @@ class BaseParentView(LoginRequiredMixin, View):
                 logger.debug("switched context for patient %s to context %s" % (patient_model,
                                                                                 self.rdrf_context.id))
 
-        except RDRFContextError, ex:
+        except RDRFContextError as ex:
             logger.error("Error setting rdrf context id %s for patient %s in %s: %s" % (context_id,
                                                                                         patient_model,
                                                                                         self.registry,
