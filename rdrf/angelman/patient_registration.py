@@ -16,9 +16,9 @@ class AngelmanRegistration(BaseRegistration, object):
     def process(self,):
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
-    
+
         user = self._create_django_user(self.request, self.user, registry, True)
-    
+
         try:
             clinician_id, working_group_id = self.request.POST['clinician'].split("_")
             clinician = CustomUser.objects.get(id=clinician_id)
@@ -29,9 +29,9 @@ class AngelmanRegistration(BaseRegistration, object):
             working_group, status = WorkingGroup.objects.get_or_create(
                 name=self._UNALLOCATED_GROUP, registry=registry)
             user.working_groups = [working_group, ]
-    
+
         user.save()
-    
+
         patient = Patient.objects.create(
             consent=True,
             family_name=user.last_name,
@@ -39,19 +39,19 @@ class AngelmanRegistration(BaseRegistration, object):
             date_of_birth=self.request.POST["date_of_birth"],
             sex=self._GENDER_CODE[self.request.POST["gender"]]
         )
-    
+
         patient.rdrf_registry.add(registry.id)
         patient.working_groups.add(working_group.id)
         patient.clinician = clinician
         patient.home_phone = self.request.POST["phone_number"]
         patient.email = user.username
         patient.user = None
-    
+
         patient.save()
-        
+
         address = self._create_patient_address(patient, self.request)
         address.save()
-    
+
         parent_guardian = self._create_parent(self.request)
         parent_guardian.patient.add(patient)
         parent_guardian.user = user
@@ -63,7 +63,7 @@ class AngelmanRegistration(BaseRegistration, object):
             "registration": RegistrationProfile.objects.get(user=user)
         }
         process_notification(registry_code, settings.EMAIL_NOTE_NEW_PATIENT, self.request.LANGUAGE_CODE, template_data)
-        
+
         if "clinician-other" in self.request.POST['clinician']:
             other_clinician = ClinicianOther.objects.create(
                 patient=patient,
@@ -78,7 +78,8 @@ class AngelmanRegistration(BaseRegistration, object):
                 "patient": patient,
                 "parent": parent_guardian
             }
-            process_notification(registry_code, settings.EMAIL_NOTE_OTHER_CLINICIAN, self.request.LANGUAGE_CODE, template_data)
+            process_notification(
+                registry_code, settings.EMAIL_NOTE_OTHER_CLINICIAN, self.request.LANGUAGE_CODE, template_data)
 
     def _create_parent(self, request):
         parent_guardian = ParentGuardian.objects.create(

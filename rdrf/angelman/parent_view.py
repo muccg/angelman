@@ -39,7 +39,7 @@ class RDRFContextSwitchError(Exception):
 
 
 class BaseParentView(LoginRequiredMixin, View):
-    
+
     def __init__(self,):
         self.registry = None
         self.rdrf_context = None
@@ -69,7 +69,6 @@ class BaseParentView(LoginRequiredMixin, View):
 
         return clinician, working_group
 
-
     def set_rdrf_context(self, patient_model, context_id):
         # Ensure we always have a context , otherwise bail
         self.rdrf_context = None
@@ -96,6 +95,7 @@ class BaseParentView(LoginRequiredMixin, View):
                                                                                         ex))
 
             raise RDRFContextSwitchError
+
 
 class ParentView(BaseParentView):
 
@@ -130,7 +130,7 @@ class ParentView(BaseParentView):
             context['patients'] = patients
             context['registry_code'] = registry_code
             context['registry_forms'] = forms
-            
+
             self.set_rdrf_context(parent, context_id)
             context['context_id'] = self.rdrf_context.pk
 

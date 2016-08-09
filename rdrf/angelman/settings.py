@@ -9,7 +9,7 @@ INSTALLED_APPS = [
     FALLBACK_REGISTRY_CODE,
 ] + INSTALLED_APPS
 
-#Angelman WEBAPP_ROOT is different to RDRF base. This allows to find overriden templates
+# Angelman WEBAPP_ROOT is different to RDRF base. This allows to find overriden templates
 ANGELMAN_WEBAPP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES[0]['DIRS'] = [
     os.path.join(ANGELMAN_WEBAPP_ROOT, FALLBACK_REGISTRY_CODE, 'templates'),
