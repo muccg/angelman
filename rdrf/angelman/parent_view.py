@@ -8,8 +8,15 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 
-from registry.patients.models import ParentGuardian, Patient, PatientAddress, AddressType, ConsentValue
-from rdrf.models import Registry, RegistryForm, ConsentSection, ConsentQuestion
+from registry.patients.models import AddressType
+from registry.patients.models import ConsentValue
+from registry.patients.models import ParentGuardian
+from registry.patients.models import Patient
+from registry.patients.models import PatientAddress
+from rdrf.models import ConsentQuestion
+from rdrf.models import ConsentSection
+from rdrf.models import Registry
+from rdrf.models import RegistryForm
 from registry.patients.admin_forms import ParentGuardianForm
 from rdrf.utils import consent_status_for_patient
 
@@ -19,7 +26,6 @@ from rdrf.utils import consent_status_for_patient
 from rdrf.contexts_api import RDRFContextManager, RDRFContextError
 
 from registry.groups.models import WorkingGroup
-from django.utils.translation import ugettext as _
 import logging
 
 

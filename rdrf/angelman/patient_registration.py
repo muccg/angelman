@@ -1,7 +1,11 @@
 from registry.groups.patient_registration.base import BaseRegistration
 from rdrf.email_notification import process_notification
 from registration.models import RegistrationProfile
-from registry.patients.models import Patient, PatientAddress, AddressType, ParentGuardian, ClinicianOther
+from registry.patients.models import AddressType
+from registry.patients.models import ClinicianOther
+from registry.patients.models import ParentGuardian
+from registry.patients.models import Patient
+from registry.patients.models import PatientAddress
 from registry.groups.models import WorkingGroup, CustomUser
 
 from rdrf.email_notification import RdrfEmail
