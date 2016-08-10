@@ -8,8 +8,15 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 
-from registry.patients.models import ParentGuardian, Patient, PatientAddress, AddressType, ConsentValue
-from rdrf.models import Registry, RegistryForm, ConsentSection, ConsentQuestion
+from registry.patients.models import AddressType
+from registry.patients.models import ConsentValue
+from registry.patients.models import ParentGuardian
+from registry.patients.models import Patient
+from registry.patients.models import PatientAddress
+from rdrf.models import ConsentQuestion
+from rdrf.models import ConsentSection
+from rdrf.models import Registry
+from rdrf.models import RegistryForm
 from registry.patients.admin_forms import ParentGuardianForm
 from rdrf.utils import consent_status_for_patient
 
@@ -19,7 +26,6 @@ from rdrf.utils import consent_status_for_patient
 from rdrf.contexts_api import RDRFContextManager, RDRFContextError
 
 from registry.groups.models import WorkingGroup
-from django.utils.translation import ugettext as _
 import logging
 
 
@@ -39,7 +45,7 @@ class RDRFContextSwitchError(Exception):
 
 
 class BaseParentView(LoginRequiredMixin, View):
-    
+
     def __init__(self,):
         self.registry = None
         self.rdrf_context = None
@@ -69,7 +75,6 @@ class BaseParentView(LoginRequiredMixin, View):
 
         return clinician, working_group
 
-
     def set_rdrf_context(self, patient_model, context_id):
         # Ensure we always have a context , otherwise bail
         self.rdrf_context = None
@@ -89,13 +94,14 @@ class BaseParentView(LoginRequiredMixin, View):
                 logger.debug("switched context for patient %s to context %s" % (patient_model,
                                                                                 self.rdrf_context.id))
 
-        except RDRFContextError, ex:
+        except RDRFContextError as ex:
             logger.error("Error setting rdrf context id %s for patient %s in %s: %s" % (context_id,
                                                                                         patient_model,
                                                                                         self.registry,
                                                                                         ex))
 
             raise RDRFContextSwitchError
+
 
 class ParentView(BaseParentView):
 
@@ -130,7 +136,7 @@ class ParentView(BaseParentView):
             context['patients'] = patients
             context['registry_code'] = registry_code
             context['registry_forms'] = forms
-            
+
             self.set_rdrf_context(parent, context_id)
             context['context_id'] = self.rdrf_context.pk
 
