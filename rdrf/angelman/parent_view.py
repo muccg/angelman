@@ -13,6 +13,7 @@ from registry.patients.models import ConsentValue
 from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
+from registry.patients.models import ClinicianOther
 from rdrf.models import ConsentQuestion
 from rdrf.models import ConsentSection
 from rdrf.models import Registry
@@ -178,6 +179,17 @@ class ParentView(BaseParentView):
 
         parent.patient.add(patient)
         parent.save()
+
+        if request.POST['clinician'] == 'clinician-other':
+            ClinicianOther.objects.create(
+                patient = patient,
+                clinician_name = request.POST.get('other_clinician_name'),
+                clinician_hospital = request.POST.get('other_clinician_hospital'),
+                clinician_address = request.POST.get('other_clinician_address'),
+                clinician_email = request.POST.get('other_clinician_email'),
+                clinician_phone_number = request.POST.get('other_clinician_phone_number')
+            )
+
         messages.add_message(request, messages.SUCCESS, 'Patient added successfully')
         return redirect(reverse("parent_page", args={registry_code: registry_code}))
 
