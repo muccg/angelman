@@ -183,6 +183,14 @@ class ParentView(BaseParentView):
 
 
 class ParentEditView(BaseParentView):
+    
+    def update_name(self, user, form):
+        first_name = form['first_name']
+        last_name = form['last_name']
+        if user.first_name != first_name or user.last_name != last_name:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
 
     def get(self, request, registry_code, parent_id, context_id=None):
         context = {}
@@ -204,6 +212,7 @@ class ParentEditView(BaseParentView):
         parent_form = ParentGuardianForm(request.POST, instance=parent)
         if parent_form.is_valid():
             parent_form.save()
+            self.update_name(request.user, parent_form.cleaned_data)
             messages.add_message(request, messages.SUCCESS, "Details saved")
         else:
             messages.add_message(request, messages.ERROR, "Please correct the errors bellow")
