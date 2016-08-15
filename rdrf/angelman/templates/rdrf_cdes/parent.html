@@ -71,8 +71,17 @@
 {% block content %}
     {% if request.user.is_authenticated %}
         <blockquote>
-            <h4><i>Welcome {{request.user.first_name}} {{request.user.last_name}}!</i></h4>
+            <h4>Welcome {{request.user.first_name}} {{request.user.last_name}} to the Angelman Registry</h4>
         </blockquote>
+        
+        <div class="alert alert-warning">
+            <ul>
+                <li>Please first provide your consent to participate in the registry by clicking on the link to 'Please sign consent'.</li>
+                <li>Once you have provided consent, you may access the Registry Forms by clicking on the 'Forms' dropdown.</li>
+                <li>To change your own personal details, click on "your name" (in the menu bar) and go to "Account".</li>
+                <li>To add another patient, click on "Menu" and go to "Add a patient".</li>
+            </ul>
+        </div>
 
         <div class="modal fade" id="new_patient_modal" tabindex="-1" role="dialog" aria-labelledby="newPatientModal" aria-hidden="true">
             <div class="modal-dialog modal-lg">
