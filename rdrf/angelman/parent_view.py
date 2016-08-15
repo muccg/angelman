@@ -20,7 +20,7 @@ from rdrf.models import Registry
 from rdrf.models import RegistryForm
 from registry.patients.admin_forms import ParentGuardianForm
 from rdrf.utils import consent_status_for_patient
-
+from rdrf import form_progress
 
 from rdrf.utils import consent_status_for_patient
 
@@ -115,28 +115,35 @@ class ParentView(BaseParentView):
             self.registry = registry
             self.rdrf_context_manager = RDRFContextManager(self.registry)
 
-            forms_objects = RegistryForm.objects.filter(registry=registry).order_by('position')
-            forms = []
-            for form in forms_objects:
-                forms.append({
-                    "form": form,
-                    "readonly": request.user.has_perm("rdrf.form_%s_is_readonly" % form.id)
-                })
-
             patients_objects = parent.patient.all()
             patients = []
+
+            forms_objects = RegistryForm.objects.filter(registry=registry).order_by('position')
+
+            progress = form_progress.FormProgress(registry)
+            
             for patient in patients_objects:
+                forms = []
+                for form in forms_objects:
+                    forms.append({
+                        "form": form,
+                        "progress": progress.get_form_progress(form, patient),
+                        "current": progress.get_form_currency(form, patient),
+                        "readonly": request.user.has_perm("rdrf.form_%s_is_readonly" % form.id)
+                    })
+
                 self.set_rdrf_context(patient, context_id)
                 patients.append({
                     "patient": patient,
                     "consent": consent_status_for_patient(registry_code, patient),
-                    "context_id": self.rdrf_context.pk
+                    "context_id": self.rdrf_context.pk,
+                    "forms": forms
                 })
+                
 
             context['parent'] = parent
             context['patients'] = patients
             context['registry_code'] = registry_code
-            context['registry_forms'] = forms
 
             self.set_rdrf_context(parent, context_id)
             context['context_id'] = self.rdrf_context.pk
