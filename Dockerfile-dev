@@ -33,7 +33,7 @@ RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -r angelman/test-requirem
 
 # Copy code and install the app
 COPY . /app
-RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -e rdrf
+RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -e rdrf/rdrf
 RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -e angelman
 
 EXPOSE 8000 9000 9001 9100 9101
