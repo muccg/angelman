@@ -6,11 +6,7 @@ node {
 
     stage 'Checkout'
         checkout scm
-        checkout([$class: 'GitSCM', 
-                  branches: [[name: "refs/heads/${env.BRANCH_NAME}"]], 
-                  doGenerateSubmoduleConfigurations: false, 
-                  extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, recursiveSubmodules: true, reference: '', trackingSubmodules: true]], 
-                  submoduleCfg: []])
+        sh 'git submodule update --init'
 
     stage 'Docker dev build'
         echo "Branch is: ${env.BRANCH_NAME}"
