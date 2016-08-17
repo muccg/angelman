@@ -26,16 +26,15 @@ RUN env | sort
 
 # Add our python deps in multiple docker layers
 # hgvs was failing due to lack of nose, hence the order
-COPY rdrf/dev-requirements.txt /app/rdrf/
-RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -r rdrf/dev-requirements.txt
-COPY rdrf/test-requirements.txt /app/rdrf/
-RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -r rdrf/test-requirements.txt
-COPY rdrf/runtime-requirements.txt /app/rdrf/
-RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -r rdrf/runtime-requirements.txt
+COPY angelman/dev-requirements.txt /app/angelman/
+RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -r angelman/dev-requirements.txt
+COPY angelman/test-requirements.txt /app/angelman/
+RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -r angelman/test-requirements.txt
 
 # Copy code and install the app
 COPY . /app
-RUN pip install --upgrade -e rdrf
+RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -e rdrf
+RUN NO_PROXY=${PIP_TRUSTED_HOST} pip install --upgrade -e angelman
 
 EXPOSE 8000 9000 9001 9100 9101
 VOLUME ["/app", "/data"]

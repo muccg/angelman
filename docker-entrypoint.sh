@@ -135,12 +135,12 @@ if [ "$1" = 'releasetarball' ]; then
 
     # install python deps
     # Note: Environment vars are used to control the behaviour of pip (use local devpi for instance)
-    pip install --upgrade -r rdrf/runtime-requirements.txt
-    pip install -e rdrf
+    pip install --upgrade -r ${PROJECT_NAME}/runtime-requirements.txt
+    pip install -e ${PROJECT_NAME}
     set +x
 
     # create release tarball
-    DEPS="/env /app/uwsgi /app/docker-entrypoint.sh /app/rdrf"
+    DEPS="/env /app/uwsgi /app/docker-entrypoint.sh /app/${PROJECT_NAME}"
     cd /data
     exec tar -cpzf ${PROJECT_NAME}-${GIT_TAG}.tar.gz ${DEPS}
 fi
