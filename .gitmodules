@@ -1,0 +1,3 @@
+[submodule "rdrf"]
+	path = rdrf
+	url = git@github.com:muccg/rdrf.git
