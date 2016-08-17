@@ -7,7 +7,7 @@ node {
     stage 'Checkout'
         checkout scm
         checkout([$class: 'GitSCM', 
-                  branches: [[name: ${env.BRANCH_NAME}]], 
+                  branches: [[name: "${env.BRANCH_NAME}"]], 
                   doGenerateSubmoduleConfigurations: false, 
                   extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, recursiveSubmodules: true, reference: '', trackingSubmodules: true]], 
                   submoduleCfg: []])
