@@ -6,6 +6,7 @@ node {
 
     stage 'Checkout'
         checkout scm
+        sh 'git submodule update --init'
 
     stage 'Docker dev build'
         echo "Branch is: ${env.BRANCH_NAME}"
