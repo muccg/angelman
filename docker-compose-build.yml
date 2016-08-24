@@ -5,6 +5,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile-base
+      args:
+        http_proxy:
     image: muccg/angelman-base
 
   build:
@@ -33,6 +35,8 @@ services:
         ARG_PIP_INDEX_URL: ${PIP_INDEX_URL}
         ARG_PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST}
     image: muccg/angelman-dev
+    volumes:
+      - .:/app
 
   prod:
     build:

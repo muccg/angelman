@@ -5,18 +5,10 @@ syntax: glob
 data
 build
 dist
-rdrf/rdrf
-rdrf/registry
-rdrf/explorer
 *.rpm
 *.log
 virt_*/*
 django_rdrf.egg-info*
-rdrf.egg-info*
-rdrf/logs
-rdrf/log
-rdrf/media
-#rdrf/static
 ^docs/_static
 ^docs/_build
 ^docs/_templates
@@ -30,3 +22,8 @@ tests*.xml
 *#
 *~
 flycheck_*
+*.xls
+*.xlsx
+*.doc
+*.docx
+*.csv

@@ -14,6 +14,7 @@ node {
         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
             sh './develop.sh docker_warm_cache'
             sh './develop.sh dev_build'
+            sh './develop.sh check_migrations'
         }
 
     stage 'Unit tests'
@@ -24,7 +25,7 @@ node {
 
     stage 'Lettuce tests'
         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
-            sh './develop.sh lettuce'
+            sh './develop.sh dev_lettuce'
         }
         step([$class: 'JUnitResultArchiver', testResults: '**/data/selenium/*.xml'])
         step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/*.png'])

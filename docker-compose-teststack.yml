@@ -31,6 +31,9 @@ runservertest:
     service: runserver
   volumes_from:
     - datatest
+  command: runserver
+  environment:
+    - DEPLOYMENT=test
   links:
     - dbtest:db
     - reportingtest:reporting
