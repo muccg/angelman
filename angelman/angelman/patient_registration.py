@@ -99,3 +99,17 @@ class AngelmanRegistration(BaseRegistration, object):
             phone=request.POST["parent_guardian_phone"],
         )
         return parent_guardian
+
+    def _create_patient_address(self, patient, request, address_type="POST"):
+        same_address = "same_address" in request.POST
+        
+        address = PatientAddress.objects.create(
+            patient=patient,
+            address_type=self.get_address_type(address_type),
+            address= request.POST["parent_guardian_address"] if same_address else request.POST["address"],
+            suburb=request.POST["parent_guardian_suburb"] if same_address else request.POST["suburb"],
+            state=request.POST["parent_guardian_state"] if same_address else request.POST["state"],
+            postcode=request.POST["parent_guardian_postcode"] if same_address else request.POST["postcode"],
+            country=request.POST["parent_guardian_country"] if same_address else request.POST["country"]
+        )
+        return address
