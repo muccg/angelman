@@ -1,6 +1,7 @@
 {% load countries %}
 {% load static %}
 {% load i18n %}
+{% load registry_version %}
 
 <html>
 
@@ -35,6 +36,13 @@
             color: red;
             font-style: italic;
             font-size: small;
+        }
+        .version {
+            position: absolute;
+            bottom: 3px;
+            left: 3px;
+            font-size: xx-small;
+            color: gray;
         }
     </style>
     
@@ -186,6 +194,7 @@
     
     <nav class="navbar navbar-default navbar-fixed-bottom">
         <div class="container" style="padding-top: 10px;">
+            <div class="version">{% registry_version 'angelman' %}</div>
             <small>
             <p class="text-justify text-muted">
             Privacy Statement - All information we receive from you will be treated confidentially and will be encrypted and stored on a secure server. Only de-identified health information will be made accessible to qualified researchers who are granted permission by the Steering committee.
