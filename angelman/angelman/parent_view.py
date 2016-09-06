@@ -236,35 +236,6 @@ class ParentEditView(BaseParentView):
         else:
             messages.add_message(request, messages.ERROR, "Please correct the errors bellow")
 
-        if "self_patient_flag" in request.POST:
-            registry = Registry.objects.get(code=registry_code)
-            patient = Patient.objects.create(
-                consent=True,
-                family_name=request.POST["last_name"],
-                given_names=request.POST["first_name"],
-                date_of_birth=request.POST["date_of_birth"],
-                sex=self._GENDER_CODE[request.POST["gender"]],
-            )
-
-            PatientAddress.objects.create(
-                patient=patient,
-                address_type=AddressType.objects.get(description__icontains=self._ADDRESS_TYPE),
-                address=parent.address,
-                suburb=parent.suburb,
-                state=parent.state,
-                postcode=parent.postcode,
-                country=parent.country
-            )
-
-            patient.rdrf_registry.add(registry)
-            clinician, centre = self.get_clinician_centre(request, registry)
-            patient.clinician = clinician
-            patient.save()
-
-            parent.patient.add(patient)
-            parent.self_patient = patient
-            parent.save()
-
         context['parent'] = parent
         context['registry_code'] = registry_code
         context['parent_form'] = parent_form
