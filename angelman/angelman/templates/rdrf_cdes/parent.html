@@ -53,6 +53,18 @@
                     $("#new_patient_address").slideDown();
                 }
             });
+            
+            var state_lookup_url = "{% url 'v1:state_lookup' 'XX' %}";
+            $("#id_country").change(function() {
+                var states = $("#id_state");
+                states.empty();
+                states.append($('<option>', { value : -1 }).text("State / County / Province / Region"));
+                $.getJSON( state_lookup_url.replace('XX', this.value), function( data ) {
+                    $.each( data, function( key, val ) {
+                        states.append($('<option>', { value : val.code }).text(val.name));
+                    });
+                });
+            });
         });
         
         function go_to_page(obj) {
@@ -205,7 +217,9 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label">{% trans 'State' %}</label>
                                     <div class="col-sm-10">
-                                        <input class="form-control" id="id_state" maxlength="30" name="state" type="text" />
+                                        <select class="form-control" id="id_state" maxlength="30" name="state">
+                                            <option value="-1">State / County / Province / Region</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
