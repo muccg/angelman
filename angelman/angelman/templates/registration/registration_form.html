@@ -120,6 +120,13 @@
                 $("#id_email").val($("#id_username").val());
                 if (registration_form.valid()) {
                     registration_form.submit();
+                } else {
+                    var msg = $("#form-invalid");
+                    msg.slideDown("slow", function() {
+                        setTimeout(function() {
+                            msg.slideUp("slow")
+                            }, 2000);
+                    });
                 }
             });
             $('#id_clinician').change(function() {

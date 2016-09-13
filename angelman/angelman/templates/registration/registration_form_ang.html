@@ -13,6 +13,7 @@
         $("#username-error").hide();
         $("#registration-submit").prop("disabled", true);
         $("#registration-submit").hide();
+        $("#form-invalid").hide();
         
         $("#id_password2").on("keyup", function() {
             var password1 = $("#id_password1").val();
@@ -73,6 +74,7 @@
         
         $('#registration-form')
             .validate({
+                ignore: false,
                 rules : {
                     parent_guardian_date_of_birth : {
                         dateFormat : true,
@@ -100,10 +102,14 @@
     </p>
 </div>
 
-        <div class="alert alert-warning">
-            <strong>Parent/Guardians</strong>:
-            You may register one patient at this stage - if you have multiple patients to register, you will be able to enter their details once you have logged into the registry. Please note you must be the patient's parent or guardian to register on their behalf.
-        </div>
+<div class="alert alert-warning">
+    <strong>Parent/Guardians</strong>:
+    You may register one patient at this stage - if you have multiple patients to register, you will be able to enter their details once you have logged into the registry. Please note you must be the patient's parent or guardian to register on their behalf.
+</div>
+
+<div id="form-invalid" class="alert alert-danger">
+    Please fill out all required fields
+</div>
 
 <form class="" id="registration-form" method="POST">
     {% csrf_token %}
@@ -300,13 +306,15 @@
 
             <br>
 
-            <div class="form-group">
-                <div class="g-recaptcha" data-sitekey="{% recaptcha_site_key %}"  data-callback='reCaptchaCallback'></div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="g-recaptcha" data-sitekey="{% recaptcha_site_key %}"  data-callback='reCaptchaCallback'></div>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" id="registration-submit" class="btn btn-success pull-right">Submit</button>
+                </div>
             </div>
 
-            <div class="form-group">
-                <button type="button" id="registration-submit" class="btn btn-success pull-right">Submit</button>
-            </div>
         </div>
         </div>
     </div>
