@@ -7,8 +7,6 @@ from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
 from registry.groups.models import WorkingGroup, CustomUser
-
-from rdrf.email_notification import RdrfEmail
 from django.conf import settings
 
 
@@ -21,7 +19,7 @@ class AngelmanRegistration(BaseRegistration, object):
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
 
-        user = self._create_django_user(self.request, self.user, registry, True)
+        user = self._create_django_user(self.request, self.user, registry, is_parent=True)
 
         try:
             clinician_id, working_group_id = self.request.POST['clinician'].split("_")
@@ -38,8 +36,8 @@ class AngelmanRegistration(BaseRegistration, object):
 
         patient = Patient.objects.create(
             consent=True,
-            family_name=user.last_name,
-            given_names=user.first_name,
+            family_name=self.request.POST["surname"],
+            given_names=self.request.POST["first_name"],
             date_of_birth=self.request.POST["date_of_birth"],
             sex=self._GENDER_CODE[self.request.POST["gender"]]
         )
@@ -102,7 +100,7 @@ class AngelmanRegistration(BaseRegistration, object):
 
     def _create_patient_address(self, patient, request, address_type="POST"):
         same_address = "same_address" in request.POST
-        
+
         address = PatientAddress.objects.create(
             patient=patient,
             address_type=self.get_address_type(address_type),
