@@ -16,6 +16,8 @@ class AngelmanRegistration(BaseRegistration, object):
         super(AngelmanRegistration, self).__init__(user, request)
 
     def process(self):
+        is_parent = True if self._TRUE_FALSE[self.request.POST['is_parent']] else False
+
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
 
