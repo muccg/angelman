@@ -7,7 +7,6 @@ from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
 from registry.groups.models import WorkingGroup, CustomUser
-
 from rdrf.email_notification import RdrfEmail
 from django.conf import settings
 
@@ -17,7 +16,7 @@ class AngelmanRegistration(BaseRegistration, object):
     def __init__(self, user, request):
         super(AngelmanRegistration, self).__init__(user, request)
 
-    def process(self,):
+    def process(self):
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
 
@@ -36,36 +35,60 @@ class AngelmanRegistration(BaseRegistration, object):
 
         user.save()
 
-        patient = Patient.objects.create(
-            consent=True,
-            family_name=user.last_name,
-            given_names=user.first_name,
-            date_of_birth=self.request.POST["date_of_birth"],
-            sex=self._GENDER_CODE[self.request.POST["gender"]]
-        )
+        if not is_parent:
+            # patient is the user
+            patient = Patient.objects.create(
+                consent=True,
+                family_name=user.last_name,
+                given_names=user.first_name,
+                date_of_birth=self.request.POST["date_of_birth"],
+                sex=self._GENDER_CODE[self.request.POST["gender"]]
+            )
 
-        patient.rdrf_registry.add(registry.id)
-        patient.working_groups.add(working_group.id)
-        patient.clinician = clinician
-        patient.home_phone = self.request.POST["phone_number"]
-        patient.email = user.username
-        patient.user = None
+            patient.rdrf_registry.add(registry.id)
+            patient.working_groups.add(working_group.id)
+            patient.clinician = clinician
+            patient.home_phone = self.request.POST["phone_number"]
+            patient.email = user.username
+            patient.user = user
+
+        else:
+
+            # patient is the child of the user
+            patient = Patient.objects.create(
+                consent=True,
+                family_name=self.request.POST["surname"],
+                given_names=self.request.POST["first_name"],
+                date_of_birth=self.request.POST["date_of_birth"],
+                sex=self._GENDER_CODE[self.request.POST["gender"]]
+            )
+
+            patient.rdrf_registry.add(registry.id)
+            patient.working_groups.add(working_group.id)
+            patient.clinician = clinician
+            patient.home_phone = self.request.POST["phone_number"]
+            patient.email = self.request.POST["username"]
+            patient.user = None
 
         patient.save()
 
         address = self._create_patient_address(patient, self.request)
         address.save()
 
-        parent_guardian = self._create_parent(self.request)
-        parent_guardian.patient.add(patient)
-        parent_guardian.user = user
-        parent_guardian.save()
+        if is_parent:
+            parent_guardian = self._create_parent(self.request)
+            parent_guardian.patient.add(patient)
+            parent_guardian.user = user
+            parent_guardian.save()
 
         template_data = {
             "patient": patient,
-            "parent": parent_guardian,
             "registration": RegistrationProfile.objects.get(user=user)
         }
+
+        if is_parent:
+            template_data["parent"] = parent_guardian
+
         process_notification(registry_code, settings.EMAIL_NOTE_NEW_PATIENT, self.request.LANGUAGE_CODE, template_data)
 
         if "clinician-other" in self.request.POST['clinician']:
@@ -102,7 +125,7 @@ class AngelmanRegistration(BaseRegistration, object):
 
     def _create_patient_address(self, patient, request, address_type="POST"):
         same_address = "same_address" in request.POST
-        
+
         address = PatientAddress.objects.create(
             patient=patient,
             address_type=self.get_address_type(address_type),
