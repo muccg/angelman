@@ -7,7 +7,6 @@ from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
 from registry.groups.models import WorkingGroup, CustomUser
-from rdrf.email_notification import RdrfEmail
 from django.conf import settings
 
 
