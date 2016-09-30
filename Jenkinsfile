@@ -5,7 +5,7 @@ node {
     def deployable_branches = ["master", "next_release"]
 
     stage('Checkout') {
-        checkout scm: [$class: 'GitSCM', branches: [[name: '**']], extensions: [[$class: 'SubmoduleOption', disableSubmodules: false,  parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]]]
+        checkout([$class: 'GitSCM', branches: [[name: '**']], extensions: [[$class: 'SubmoduleOption', disableSubmodules: false,  parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]]])
     }
 
     stage('Docker dev build') {
