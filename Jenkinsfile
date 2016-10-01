@@ -5,8 +5,18 @@ node {
     def deployable_branches = ["master", "next_release"]
 
     stage('Checkout') {
-        checkout([$class: 'GitSCM', branches: [[name: env.BRANCH_NAME]], extensions: [[$class: 'SubmoduleOption', disableSubmodules: false,  parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]]])
-        //checkout([$class: 'GitSCM', branches: [[name: '**']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false]], submoduleCfg: [], userRemoteConfigs: [[]]])
+        echo "Branch is: ${env.BRANCH_NAME}"
+
+        checkout scm
+
+        withCredentials([[$class: 'FileBinding', credentialsId: 'ccgbuildbot_gh_ssh', variable: 'SSH_KEY']]) {
+            sh('''
+                eval `ssh-agent`
+                ssh-add $SSH_KEY
+                git submodule update --init
+            ''')
+        }
+
     }
 
     stage('Docker dev build') {
