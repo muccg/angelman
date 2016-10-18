@@ -1,18 +1,11 @@
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 
-import parent_view
-import patient_view
+from . import parent_view
 
-urlpatterns = patterns('',
-                       url(r"^(?P<registry_code>\w+)/parent/?$",
-                           parent_view.ParentView.as_view(), name='parent_page'),
-
-                       url(r"^(?P<registry_code>\w+)/parent/(?P<parent_id>\d+)/?$",
-                           parent_view.ParentEditView.as_view(), name='parent_edit'))
-
-#                       url(r"^(?P<registry_code>\w+)/patient/?$",
-#                           patient_view.PatientView.as_view(), name='patient_page'))
-
-urlpatterns += patterns('',
-                        url(r'', include('rdrf.urls')),
-                        )
+urlpatterns = [
+    url(r"^(?P<registry_code>\w+)/parent/?$",
+        parent_view.ParentView.as_view(), name='parent_page'),
+    url(r"^(?P<registry_code>\w+)/parent/(?P<parent_id>\d+)/?$",
+        parent_view.ParentEditView.as_view(), name='parent_edit'),
+    url(r'', include('rdrf.urls')),
+]

@@ -1,7 +1,7 @@
 import logging
 
 from django.views.generic.base import View
-from django.shortcuts import render_to_response, RequestContext, redirect
+from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.decorators import method_decorator
@@ -121,7 +121,7 @@ class ParentView(BaseParentView):
             forms_objects = RegistryForm.objects.filter(registry=registry).order_by('position')
 
             progress = form_progress.FormProgress(registry)
-            
+
             for patient in patients_objects:
                 forms = []
                 for form in forms_objects:
@@ -139,7 +139,7 @@ class ParentView(BaseParentView):
                     "context_id": self.rdrf_context.pk,
                     "forms": forms
                 })
-                
+
 
             context['parent'] = parent
             context['patients'] = patients
@@ -148,10 +148,7 @@ class ParentView(BaseParentView):
             self.set_rdrf_context(parent, context_id)
             context['context_id'] = self.rdrf_context.pk
 
-        return render_to_response(
-            'rdrf_cdes/parent.html',
-            context,
-            context_instance=RequestContext(request))
+        return render(request, 'rdrf_cdes/parent.html', context)
 
     def post(self, request, registry_code, context_id=None):
         parent = ParentGuardian.objects.get(user=request.user)
@@ -202,7 +199,7 @@ class ParentView(BaseParentView):
 
 
 class ParentEditView(BaseParentView):
-    
+
     def update_name(self, user, form):
         first_name = form['first_name']
         last_name = form['last_name']
@@ -219,10 +216,7 @@ class ParentEditView(BaseParentView):
         context['registry_code'] = registry_code
         context['parent_form'] = ParentGuardianForm(instance=parent)
 
-        return render_to_response(
-            "rdrf_cdes/parent_edit.html",
-            context,
-            context_instance=RequestContext(request))
+        return render(request, "rdrf_cdes/parent_edit.html", context)
 
     def post(self, request, registry_code, parent_id, context_id=None):
         context = {}
@@ -240,7 +234,4 @@ class ParentEditView(BaseParentView):
         context['registry_code'] = registry_code
         context['parent_form'] = parent_form
 
-        return render_to_response(
-            "rdrf_cdes/parent_edit.html",
-            context,
-            context_instance=RequestContext(request))
+        return render(request, "rdrf_cdes/parent_edit.html", context)
