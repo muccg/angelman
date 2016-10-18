@@ -1,9 +1,10 @@
 sure==1.2.12
+django-nose
 nose
 nose-timer
-django_nose
-lettuce
-lettuce_webdriver
+aloe
+aloe_webdriver
+aloe_django
 pyvirtualdisplay
 selenium
 unittest-xml-reporting
