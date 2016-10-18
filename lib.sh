@@ -328,7 +328,8 @@ _start_test_stack() {
 
 
     set -x
-    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-teststack.yml rm -v --force
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-teststack.yml stop
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-teststack.yml rm --all -v --force
     docker-compose --project-name ${PROJECT_NAME} -f docker-compose-teststack.yml up $@
     set +x
     success 'test stack up'
@@ -356,7 +357,8 @@ _start_prod_stack() {
 
 
     set -x
-    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-prod.yml rm -v --force
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-prod.yml stop
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-prod.yml rm --all -v --force
     docker-compose --project-name ${PROJECT_NAME} -f docker-compose-prod.yml up $@
     set +x
     success 'prod stack up'
@@ -382,7 +384,7 @@ run_unit_tests() {
     _start_test_stack --force-recreate -d
 
     set +e
-    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-unittests.yml run --rm testhost
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-teststack.yml run --rm runservertest runtests
     rval=$?
     set -e
 
@@ -436,7 +438,8 @@ dev_lettuce() {
     _start_selenium --force-recreate -d
     _start_test_stack --force-recreate -d
 
-    start_lettucetests up --force-recreate devlettuce
+    # Use run so we can get correct return codes from test run
+    start_lettucetests run --rm devlettuce
     local rval=$?
 
     _stop_test_stack
@@ -445,13 +448,13 @@ dev_lettuce() {
     exit $rval
 }
 
-
 prod_lettuce() {
     info 'prod lettuce'
     _start_selenium --force-recreate -d
     _start_prod_stack --force-recreate -d
 
-    start_lettucetests up --force-recreate prodlettuce
+    # Use run so we can get correct return codes from test run
+    start_lettucetests run --rm prodlettuce
     local rval=$?
 
     _stop_prod_stack
@@ -480,10 +483,12 @@ check_migrations() {
 
     set -x
     set +e
-    docker-compose -f docker-compose-build.yml --project-name ${PROJECT_NAME} run --rm dev django-admin makemigrations ${PROJECT_NAME} --dry-run --noinput -e
-    local check=$?
+    docker-compose -f docker-compose.yml --project-name ${PROJECT_NAME} run --rm runserver django-admin makemigrations  --dry-run --noinput --check 
+    local rval=$?
+    docker-compose -f docker-compose.yml --project-name ${PROJECT_NAME} stop
+    docker-compose -f docker-compose.yml --project-name ${PROJECT_NAME} rm --all -v --force
     set -e
     set +x
 
-    exec expr $check = 1 > /dev/null
+    exit $rval
 }
