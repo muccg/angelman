@@ -49,9 +49,12 @@ usage() {
     exit 1
 }
 
-
 info () {
   printf "\r  [ \033[00;34mINFO\033[0m ] $1\n"
+}
+
+warn () {
+  printf "\r  [ \033[00;33mWARN\033[0m ] $1\n"
 }
 
 success () {
@@ -67,8 +70,11 @@ fail () {
 
 
 docker_options() {
-    DOCKER_ROUTE=$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')
-    success "Docker ip ${DOCKER_ROUTE}"
+    if [ "$(uname)" != "Darwin" ]; then
+        # There is no docker0 interface on Mac OS, so don't do any proxy detection
+        DOCKER_ROUTE=$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')
+        success "Docker ip ${DOCKER_ROUTE}"
+    fi
 
     _http_proxy
     _pip_proxy
@@ -100,14 +106,18 @@ _http_proxy() {
     info 'http proxy'
 
     if [ ${SET_HTTP_PROXY} = "1" ]; then
-        if [ -z ${HTTP_PROXY_HOST+x} ]; then
+        if [ -z ${HTTP_PROXY_HOST} ]; then
             HTTP_PROXY_HOST=${DOCKER_ROUTE}
         fi
-        http_proxy="http://${HTTP_PROXY_HOST}:3128"
-        HTTP_PROXY="http://${HTTP_PROXY_HOST}:3128"
-        NO_PROXY=${HTTP_PROXY_HOST}
-        no_proxy=${HTTP_PROXY_HOST}
-        success "Proxy $http_proxy"
+        if [ -z ${HTTP_PROXY_HOST} ]; then
+            warn  "SET_HTTP_PROXY is set but couldn't detect a proxy. Please set HTTP_PROXY_HOST, or disable proxying by unsetting SET_HTTP_PROXY"
+        else
+            http_proxy="http://${HTTP_PROXY_HOST}:3128"
+            HTTP_PROXY="http://${HTTP_PROXY_HOST}:3128"
+            NO_PROXY=${HTTP_PROXY_HOST}
+            no_proxy=${HTTP_PROXY_HOST}
+            success "Proxy $http_proxy"
+        fi
     else
         info 'Not setting http_proxy'
     fi
@@ -126,12 +136,19 @@ _pip_proxy() {
     PIP_TRUSTED_HOST='127.0.0.1'
 
     if [ ${SET_PIP_PROXY} = "1" ]; then
-        if [ -z ${PIP_PROXY_HOST+x} ]; then
+        if [ -z ${PIP_PROXY_HOST} ]; then
             PIP_PROXY_HOST=${DOCKER_ROUTE}
         fi
-        # use a local devpi install
-        PIP_INDEX_URL="http://${PIP_PROXY_HOST}:3141/root/pypi/+simple/"
-        PIP_TRUSTED_HOST="${PIP_PROXY_HOST}"
+        if [ -z ${PIP_PROXY_HOST} ]; then
+            warn "SET_PIP_PROXY is set but couldn't detect a proxy. Please set PIP_PROXY_HOST, or disable proxying by unsetting SET_PIP_PROXY"
+        else
+            info ${PIP_PROXY_HOST}
+            # use a local devpi install
+            PIP_INDEX_URL="http://${PIP_PROXY_HOST}:3141/root/pypi/+simple/"
+            PIP_TRUSTED_HOST="${PIP_PROXY_HOST}"
+        fi
+    else
+        info 'Not setting pip proxy'
     fi
 
     export PIP_INDEX_URL PIP_TRUSTED_HOST
@@ -398,9 +415,9 @@ _start_selenium() {
     info 'selenium stack up'
 
     # remove any previous build artifacts from top level selenium dir
-    rm --force -v data/selenium/* || true
-    mkdir -p data/selenium
-    chmod o+rwx data/selenium
+    rm --force -v data/selenium/dev/*  data/selenium/prod/* || true
+    mkdir -p data/selenium/dev data/selenium/prod
+    chmod o+rwx data/selenium/dev data/selenium/prod
 
     set -x
     docker-compose --project-name ${PROJECT_NAME} -f docker-compose-selenium.yml pull --ignore-pull-failures
@@ -426,9 +443,15 @@ start_seleniumhub() {
 
 _start_lettucetests() {
     set -x
+    # ensure previous data containers are removed
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-lettuce.yml stop
+    docker-compose --project-name ${PROJECT_NAME} -f docker-compose-lettuce.yml rm --all -v --force
     docker-compose --project-name ${PROJECT_NAME} -f docker-compose-lettuce.yml $@
     local rval=$?
     set +x
+
+    info 'artifacts'
+    ls -laRth data/selenium/ || true
 
     return $rval
 }
