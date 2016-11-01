@@ -11,7 +11,9 @@
         });
         $("#password-error").hide();
         $("#username-error").hide();
+{% if recaptcha_site_key %}
         $("#registration-submit").prop("disabled", true);
+{% endif %}
         $("#registration-submit").hide();
         $("#form-invalid").hide();
         
@@ -308,7 +310,9 @@
 
             <div class="row">
                 <div class="col-md-6">
+                  {% if recaptcha_site_key %}
                     <div class="g-recaptcha" data-sitekey="{% recaptcha_site_key %}"  data-callback='reCaptchaCallback'></div>
+                  {% endif %}
                 </div>
                 <div class="col-md-6">
                     <button type="button" id="registration-submit" class="btn btn-success pull-right">Submit</button>
