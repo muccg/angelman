@@ -249,7 +249,7 @@
                     <tr {% if not patient.consent %}class="danger"{% endif %} >
                         <td>
                             {{ forloop.counter }}
-                            {% if patient.patient.id = parent.self_patient.id %}
+                            {% if patient.patient.id == parent.self_patient.id %}
                                 <span class="label label-primary">{% trans "Self Patient" %}</span>
                             {% endif %}
                         </td>
