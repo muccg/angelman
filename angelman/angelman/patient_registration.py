@@ -98,7 +98,7 @@ class AngelmanRegistration(BaseRegistration, object):
         )
         return parent_guardian
 
-    def _create_patient_address(self, patient, request, address_type="POST"):
+    def _create_patient_address(self, patient, request, address_type="Postal"):
         same_address = "same_address" in request.POST
 
         address = PatientAddress.objects.create(
