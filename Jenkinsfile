@@ -18,7 +18,7 @@ node {
 
     }
 
-    stage('Docker dev build') {
+    stage('Dev build') {
         echo "Branch is: ${env.BRANCH_NAME}"
         echo "Build is: ${env.BUILD_NUMBER}"
         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
@@ -35,17 +35,18 @@ node {
         step([$class: 'JUnitResultArchiver', testResults: '**/data/tests/*.xml'])
     }
 
-    stage('Lettuce tests') {
+    stage('Dev aloe tests') {
         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
-            sh './develop.sh dev_lettuce'
+            sh './develop.sh dev_aloe'
         }
-        step([$class: 'JUnitResultArchiver', testResults: '**/data/selenium/*.xml'])
-        step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/*.png', fingerprint: true])
+        step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/dev/scratch/*.png', fingerprint: true])
+        step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/dev/log/*.png', fingerprint: true])
+        step([$class: 'JUnitResultArchiver', testResults: '**/data/selenium/dev/scratch/*.xml'])
     }
 
     if (deployable_branches.contains(env.BRANCH_NAME)) {
 
-        stage('Docker prod build') {
+        stage('Prod build') {
             wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
                 sh './develop.sh prod_build'
             }
