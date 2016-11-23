@@ -1,1 +1,1 @@
--e git+https://github.com/muccg/rdrf.git@1.7.9#egg=django-rdrf&subdirectory=rdrf
+-e git+https://github.com/muccg/rdrf.git@1.7.10#egg=django-rdrf&subdirectory=rdrf
