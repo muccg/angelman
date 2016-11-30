@@ -27,7 +27,7 @@ usage() {
     echo " ./develop.sh (baseimage|buildimage|devimage|releasetarball|prodimage)"
     echo " ./develop.sh (dev|dev_build|django_admin|check_migrations)"
     echo " ./develop.sh (prod|prod_build)"
-    echo " ./develop.sh (runtests|dev_aloe|prod_aloe|reexport_test_zips)"
+    echo " ./develop.sh (runtests|dev_aloe|dev_rdrf_aloe|prod_aloe|reexport_test_zips)"
     echo " ./develop.sh (start_test_stack|start_seleniumhub)"
     echo " ./develop.sh (pythonlint|jslint)"
     echo " ./develop.sh (ci_docker_login)"
@@ -36,7 +36,7 @@ usage() {
     echo "SET_PIP_PROXY=0 SET_HTTP_PROXY=0 ./develop.sh dev_build"
     echo ""
     echo "Example, run test suite against a single feature:"
-    echo "./develop.sh dev_aloe rdrf/features/landing.feature"
+    echo "./develop.sh dev_aloe angelman/features/landing.feature"
     exit 1
 }
 
@@ -142,9 +142,6 @@ publish_docker_image)
     publish_docker_image
     ;;
 runtests)
-    create_base_image
-    create_build_image
-    create_dev_image
     run_unit_tests
     ;;
 start_test_stack)
@@ -159,13 +156,17 @@ docker_warm_cache)
 ci_docker_login)
     ci_docker_login
     ;;
+dev_rdrf_aloe)
+    shift
+    dev_aloe aloe_rdrf $@
+    ;;
 dev_aloe)
     shift
-    dev_aloe $@
+    dev_aloe aloe $@
     ;;
 aloe)
     shift
-    dev_aloe $@
+    dev_aloe aloe $@
     ;;
 reexport_test_zips)
     reexport_test_zips
