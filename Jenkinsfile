@@ -67,7 +67,7 @@ node {
                 sh './develop.sh prod_aloe'
                 step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/prod/scratch/*.png',     fingerprint: false, excludes: null])
                 step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/prod/log/*.log',         fingerprint: false, excludes: null])
-                step([$class: 'JUnitResultArchiver', testResults: '**/data/selenium/prod/scratch/*.     xml'])
+                step([$class: 'JUnitResultArchiver', testResults: '**/data/selenium/prod/scratch/*.xml'])
             }
         }
 
