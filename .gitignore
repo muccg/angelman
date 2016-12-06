@@ -27,3 +27,4 @@ flycheck_*
 *.doc
 *.docx
 *.csv
+*.mongo

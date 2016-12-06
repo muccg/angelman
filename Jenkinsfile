@@ -35,6 +35,15 @@ node {
         step([$class: 'JUnitResultArchiver', testResults: '**/data/tests/*.xml'])
     }
 
+    stage('Dev RDRF aloe tests') {
+        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
+            sh './develop.sh dev_rdrf_aloe'
+        }
+        step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/dev/scratch/*.png', fingerprint: true])
+        step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/dev/log/*.log', fingerprint: true])
+        step([$class: 'JUnitResultArchiver', testResults: '**/data/selenium/dev/scratch/*.xml'])
+    }
+
     stage('Dev aloe tests') {
         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
             sh './develop.sh dev_aloe'
@@ -49,6 +58,16 @@ node {
         stage('Prod build') {
             wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
                 sh './develop.sh prod_build'
+            }
+        }
+
+ 
+        stage('Prod aloe tests') {
+            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
+                sh './develop.sh prod_aloe'
+                step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/prod/scratch/*.png',     fingerprint: false, excludes: null])
+                step([$class: 'ArtifactArchiver', artifacts: '**/data/selenium/prod/log/*.log',         fingerprint: false, excludes: null])
+                step([$class: 'JUnitResultArchiver', testResults: '**/data/selenium/prod/scratch/*.     xml'])
             }
         }
 
