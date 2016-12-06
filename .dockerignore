@@ -16,3 +16,4 @@ docker-compose*
 develop.sh
 lib.sh
 Jenkinsfile
+*.mongo
