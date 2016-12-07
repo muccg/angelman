@@ -11,9 +11,7 @@
         });
         $("#password-error").hide();
         $("#username-error").hide();
-{% if recaptcha_site_key %}
         $("#registration-submit").prop("disabled", true);
-{% endif %}
         $("#registration-submit").hide();
         $("#form-invalid").hide();
         
