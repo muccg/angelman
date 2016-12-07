@@ -22,3 +22,6 @@ SEND_ACTIVATION_EMAIL = False
 
 RECAPTCHA_SITE_KEY = env.get("recaptcha_site_key", "")
 RECAPTCHA_SECRET_KEY = env.get("recaptcha_secret_key", "")
+
+PROJECT_TITLE = "Global Angelman Syndrome Registry"
+PROJECT_TITLE_LINK = "login_router"
