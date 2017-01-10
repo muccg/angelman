@@ -3,8 +3,8 @@
 node {
     env.DOCKER_USE_HUB = 1
     def deployable_branches = ["master", "next_release"]
-    def artifacts = []
     def testResults = []
+    def artifacts = []
 
     stage('Checkout') {
         checkout scm
@@ -17,60 +17,58 @@ node {
                 git submodule update --init
             ''')
         }
-
     }
 
-    stage('Dev build') {
+    dockerStage('Dev build') {
         echo "Branch is: ${env.BRANCH_NAME}"
         echo "Build is: ${env.BUILD_NUMBER}"
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
-            sh('''
-                ./develop.sh docker_warm_cache
-                ./develop.sh dev_build
-                ./develop.sh check_migrations
-            ''')
-        }
+        sh('''
+            ./develop.sh build base
+            ./develop.sh build builder
+            ./develop.sh build dev
+            ./develop.sh check-migrations
+        ''')
     }
 
     testResults = ['**/data/tests/*.xml']
     dockerStage('Unit tests', [], testResults) {
-        sh('./develop.sh runtests')
+        sh('./develop.sh run-unittests')
     }
 
     artifacts = ['**/data/selenium/dev/scratch/*.png', '**/data/selenium/dev/log/*.log']
     testResults = ['**/data/selenium/dev/scratch/*.xml']
-    dockerStage('Dev RDRF aloe tests', artifacts, testResults) {
-        sh('./develop.sh dev_rdrf_aloe')
+    dockerStage('Dev RDRF aloe', artifacts, testResults) {
+        sh('./develop.sh aloe teststack aloe_rdrf')
     }
 
-    dockerStage('Dev aloe tests', artifacts, testResults) {
-        sh('./develop.sh dev_aloe')
+    dockerStage('Dev Angelman aloe', artifacts, testResults) {
+        sh('rm -f /data/selenium/dev/scratch/*.png /data/selenium/dev/log/*.log /data/selenium/dev/scratch/*.xml')
+        sh('./develop.sh aloe teststack')
     }
 
     if (deployable_branches.contains(env.BRANCH_NAME)) {
 
-        stage('Prod build') {
-            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
-                sh('./develop.sh prod_build')
-            }
+        dockerStage('Prod build') {
+            sh('''
+                ./develop.sh run-builder
+                ./develop.sh build prod
+            ''')
         }
 
         artifacts = ['**/data/selenium/prod/scratch/*.png', '**/data/selenium/prod/log/*.log']
         testResults = ['**/data/selenium/prod/scratch/*.xml']
         dockerStage('Prod aloe tests', artifacts, testResults) {
-            sh('./develop.sh prod_aloe')
+            sh('./develop.sh aloe prod')
         }
- 
-        stage('Publish docker image') {
+
+        dockerStage('Publish docker image') {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerbot',
                               usernameVariable: 'DOCKER_USERNAME',
                               passwordVariable: 'DOCKER_PASSWORD']]) {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
-                    sh('''
-                        ./develop.sh ci_docker_login
-                        ./develop.sh publish_docker_image
-                    ''')
-                }
+                sh("""
+                    docker login -u "${env.DOCKER_USERNAME}" --password="${env.DOCKER_PASSWORD}"
+                    ./develop.sh push prod
+                """)
             }
         }
     }
@@ -111,4 +109,5 @@ def dockerStage(String label,
             ''')
         }
     }
+
 }

@@ -10,7 +10,7 @@ dataprodselenium:
     service: dataprodselenium
 
 # runs the aloe tests against docker-compose-teststack.yml
-devaloe:
+teststack:
   image: muccg/angelman-dev
   command: aloe
   environment:
@@ -30,7 +30,7 @@ devaloe:
     - angelman_mongotest_1:mongo
 
 # runs the aloe tests against docker-compose-teststack.yml
-prodaloe:
+prod:
   image: muccg/angelman-dev
   command: aloe
   environment:

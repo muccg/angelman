@@ -1,4 +1,4 @@
-FROM muccg/python-base:debian8-3.5
+FROM muccg/python-base:3.5-debian-8
 MAINTAINER https://github.com/muccg/
 
 ENV PROJECT_NAME angelman
