@@ -9,14 +9,14 @@ services:
         http_proxy:
     image: muccg/angelman-base
 
-  build:
+  builder:
     build:
       context: ./
-      dockerfile: Dockerfile-build
+      dockerfile: Dockerfile-builder
       args:
         ARG_GIT_TAG: ${GIT_TAG}
         http_proxy:
-    image: muccg/angelman-build
+    image: muccg/angelman-builder
     command: releasetarball
     network_mode: host
     environment:
@@ -34,6 +34,7 @@ services:
       args:
         ARG_PIP_INDEX_URL: ${PIP_INDEX_URL}
         ARG_PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST}
+        http_proxy:
     image: muccg/angelman-dev
     volumes:
       - .:/app
@@ -44,10 +45,7 @@ services:
       dockerfile: Dockerfile-prod
       args:
         ARG_GIT_TAG: ${GIT_TAG}
+        ARG_PIP_INDEX_URL: ${PIP_INDEX_URL}
+        ARG_PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST}
+        http_proxy:
     image: muccg/angelman:${GIT_TAG}
-
-  lint:
-    image: muccg/linter
-    working_dir: /data
-    volumes:
-        - ./:/data
