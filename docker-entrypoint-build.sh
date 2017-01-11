@@ -10,23 +10,23 @@ if [ "$1" = 'releasetarball' ]; then
     set -e
     cd /app
     rm -rf /app/*
-    echo $GIT_TAG
+    echo "${GIT_TAG}"
     set -x
-    git clone --depth=1 --branch=${GIT_TAG} ${PROJECT_SOURCE} .
-    git ls-remote ${PROJECT_SOURCE} ${GIT_TAG} > .version
+    git clone --depth=1 --branch="${GIT_TAG}" "${PROJECT_SOURCE}" .
+    git ls-remote "${PROJECT_SOURCE}" "${GIT_TAG}" > .version
 
     # Note: Environment vars are used to control the behaviour of pip (use local devpi for instance)
-    pip install --upgrade -r ${PROJECT_NAME}/runtime-requirements.txt
-    pip install -e ${PROJECT_NAME}
+    pip install --upgrade -r "${PROJECT_NAME}"/runtime-requirements.txt
+    pip install -e "${PROJECT_NAME}"
     set +x
 
     # create release tarball
     DEPS="/env /app/uwsgi /app/docker-entrypoint.sh /app/${PROJECT_NAME}"
     cd /data
-    exec tar -cpzf ${PROJECT_NAME}-${GIT_TAG}.tar.gz ${DEPS}
+    exec tar -cpzf "${PROJECT_NAME}"-"${GIT_TAG}".tar.gz "${DEPS}"
 fi
 
 echo "[RUN]: Builtin command not provided [releasetarball]"
-echo "[RUN]: $@"
+echo "[RUN]: $*"
 
 exec "$@"
