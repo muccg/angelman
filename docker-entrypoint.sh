@@ -221,10 +221,10 @@ if [ "$1" = 'aloe_rdrf' ]; then
     _aloe
 fi
 
-# aloe angelman entrypoint
+# aloe ${PROJECT_NAME} entrypoint
 if [ "$1" = 'aloe' ]; then
-    echo "[Run] Starting Angelman aloe"
-    cd /app/angelman
+    echo "[Run] Starting ${PROJECT_NAME} aloe"
+    cd /app/${PROJECT_NAME}
     _aloe
 fi
 
