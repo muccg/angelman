@@ -6,7 +6,7 @@
 # $1 host
 # $2 port
 function dockerwait {
-    while ! exec 6<>/dev/tcp/$1/$2; do
+    while ! exec 6<>/dev/tcp/"$1"/"$2"; do
         echo "$(date) - waiting to connect $1 $2"
         sleep 5
     done
@@ -21,55 +21,55 @@ function dockerwait {
 # this prevents race conditions using fig
 function wait_for_services {
     if [[ "$WAIT_FOR_DB" ]] ; then
-        dockerwait $DBSERVER $DBPORT
+        dockerwait "$DBSERVER" "$DBPORT"
     fi
     if [[ "$WAIT_FOR_CACHE" ]] ; then
-        dockerwait $CACHESERVER $CACHEPORT
+        dockerwait "$CACHESERVER" "$CACHEPORT"
     fi
     if [[ "$WAIT_FOR_RUNSERVER" ]] ; then
-        dockerwait $RUNSERVER $RUNSERVERPORT
+        dockerwait "$RUNSERVER" "$RUNSERVERPORT"
     fi
     if [[ "$WAIT_FOR_MONGO" ]] ; then
-        dockerwait $MONGOSERVER $MONGOPORT
+        dockerwait "$MONGOSERVER" "$MONGOPORT"
     fi
     if [[ "$WAIT_FOR_HOST_PORT" ]]; then
-        dockerwait $DOCKER_ROUTE $WAIT_FOR_HOST_PORT
+        dockerwait "$DOCKER_ROUTE" "$WAIT_FOR_HOST_PORT"
     fi
     if [[ "$WAIT_FOR_UWSGI" ]] ; then
-        dockerwait $UWSGISERVER $UWSGIPORT
+        dockerwait "$UWSGISERVER" "$UWSGIPORT"
     fi
 }
 
 
 function defaults {
-    : ${DBSERVER:="db"}
-    : ${DBPORT:="5432"}
-    : ${DBUSER:="webapp"}
-    : ${DBNAME:="${DBUSER}"}
-    : ${DBPASS:="${DBUSER}"}
+    : "${DBSERVER:=db}"
+    : "${DBPORT:=5432}"
+    : "${DBUSER:=webapp}"
+    : "${DBNAME:=${DBUSER}}"
+    : "${DBPASS:=${DBUSER}}"
 
-    : ${DOCKER_ROUTE:=$(/sbin/ip route|awk '/default/ { print $3 }')}
+    : "${DOCKER_ROUTE:=$(/sbin/ip route|awk '/default/ { print $3 }')}"
 
-    : ${UWSGISERVER:="uwsgi"}
-    : ${UWSGIPORT:="9000"}
-    : ${RUNSERVER:="web"}
-    : ${RUNSERVERPORT:="8000"}
-    : ${CACHESERVER:="cache"}
-    : ${CACHEPORT:="11211"}
-    : ${MEMCACHE:="${CACHESERVER}:${CACHEPORT}"}
-    : ${MONGOSERVER:="mongo"}
-    : ${MONGOPORT:="27017"}
+    : "${UWSGISERVER:=uwsgi}"
+    : "${UWSGIPORT:=9000}"
+    : "${RUNSERVER:=web}"
+    : "${RUNSERVERPORT:=8000}"
+    : "${CACHESERVER:=cache}"
+    : "${CACHEPORT:=11211}"
+    : "${MEMCACHE:=${CACHESERVER}:${CACHEPORT}}"
+    : "${MONGOSERVER:=mongo}"
+    : "${MONGOPORT:=27017}"
 
     # variables to control where tests will look for the app (aloe via selenium hub)
-    : ${TEST_APP_SCHEME:="http"}
-    : ${TEST_APP_HOST:=${DOCKER_ROUTE}}
-    : ${TEST_APP_PORT:="18000"}
-    : ${TEST_APP_PATH:="/"}
-    : ${TEST_APP_URL:="${TEST_APP_SCHEME}://${TEST_APP_HOST}:${TEST_APP_PORT}${TEST_APP_PATH}"}
-    #: ${TEST_BROWSER:="chrome"}
-    : ${TEST_BROWSER:="firefox"}
-    : ${TEST_WAIT:="30"}
-    : ${TEST_SELENIUM_HUB:="http://hub:4444/wd/hub"}
+    : "${TEST_APP_SCHEME:=http}"
+    : "${TEST_APP_HOST:=${DOCKER_ROUTE}}"
+    : "${TEST_APP_PORT:=18000}"
+    : "${TEST_APP_PATH:=/}"
+    : "${TEST_APP_URL:=${TEST_APP_SCHEME}://${TEST_APP_HOST}:${TEST_APP_PORT}${TEST_APP_PATH}}"
+    #: "${TEST_BROWSER:=chrome}"
+    : "${TEST_BROWSER:=firefox}"
+    : "${TEST_WAIT:=30}"
+    : "${TEST_SELENIUM_HUB:=http://hub:4444/wd/hub}"
 
     export DBSERVER DBPORT DBUSER DBNAME DBPASS MONGOSERVER MONGOPORT MEMCACHE DOCKER_ROUTE
     export TEST_APP_URL TEST_APP_SCHEME TEST_APP_HOST TEST_APP_PORT TEST_APP_PATH TEST_BROWSER TEST_WAIT TEST_SELENIUM_HUB
@@ -78,20 +78,20 @@ function defaults {
 
 function _django_check_deploy {
     echo "running check --deploy"
-    django-admin.py check --deploy --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee ${LOG_DIRECTORY}/uwsgi-check.log
+    django-admin.py check --deploy --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-check.log
 }
 
 
 function _django_migrate {
     echo "running migrate"
-    django-admin.py migrate --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee ${LOG_DIRECTORY}/uwsgi-migrate.log
-    django-admin.py update_permissions --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee ${LOG_DIRECTORY}/uwsgi-permissions.log
+    django-admin.py migrate --noinput --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-migrate.log
+    django-admin.py update_permissions --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-permissions.log
 }
 
 
 function _django_collectstatic {
     echo "running collectstatic"
-    django-admin.py collectstatic --noinput --settings=${DJANGO_SETTINGS_MODULE} 2>&1 | tee ${LOG_DIRECTORY}/uwsgi-collectstatic.log
+    django-admin.py collectstatic --noinput --settings="${DJANGO_SETTINGS_MODULE}" 2>&1 | tee "${LOG_DIRECTORY}"/uwsgi-collectstatic.log
 }
 
 function _django_iprestrict_permissive_fixtures {
@@ -130,6 +130,7 @@ function _runserver() {
     _django_fixtures
 
     echo "running runserver ..."
+    # shellcheck disable=SC2086
     exec django-admin.py ${RUNSERVER_OPTS}
 }
 
@@ -137,7 +138,7 @@ function _runserver() {
 function _aloe() {
     export DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}_test
     shift
-    exec django-admin.py harvest --with-xunit --xunit-file=${WRITABLE_DIRECTORY}/tests.xml --verbosity=3 $@
+    exec django-admin.py harvest --with-xunit --xunit-file="${WRITABLE_DIRECTORY}"/tests.xml --verbosity=3 "$@"
 }
 
 
@@ -150,13 +151,14 @@ wait_for_services
 if [ "$1" = 'uwsgi' ]; then
     echo "[Run] Starting prod uwsgi"
 
-    : ${UWSGI_OPTS="/app/uwsgi/docker.ini"}
+    : "${UWSGI_OPTS=/app/uwsgi/docker.ini}"
     echo "UWSGI_OPTS is ${UWSGI_OPTS}"
 
     _django_collectstatic
     _django_migrate
     _django_check_deploy
 
+    # shellcheck disable=SC2086
     exec uwsgi --die-on-term --ini ${UWSGI_OPTS}
 fi
 
@@ -164,7 +166,7 @@ fi
 if [ "$1" = 'uwsgi_local' ]; then
     echo "[Run] Starting local uwsgi"
 
-    : ${UWSGI_OPTS="/app/uwsgi/docker.ini"}
+    : "${UWSGI_OPTS=/app/uwsgi/docker.ini}"
     echo "UWSGI_OPTS is ${UWSGI_OPTS}"
 
     _django_collectstatic
@@ -172,6 +174,7 @@ if [ "$1" = 'uwsgi_local' ]; then
     _django_fixtures
     _django_check_deploy
 
+    # shellcheck disable=SC2086
     exec uwsgi --die-on-term --ini ${UWSGI_OPTS}
 fi
 
@@ -179,7 +182,7 @@ fi
 if [ "$1" = 'runserver' ]; then
     echo "[Run] Starting runserver"
 
-    : ${RUNSERVER_OPTS="runserver 0.0.0.0:${RUNSERVERPORT} --settings=${DJANGO_SETTINGS_MODULE}"}
+    : "${RUNSERVER_OPTS=runserver 0.0.0.0:${RUNSERVERPORT} --settings=${DJANGO_SETTINGS_MODULE}}"
     _runserver
 fi
 
@@ -187,7 +190,7 @@ fi
 if [ "$1" = 'runserver_plus' ]; then
     echo "[Run] Starting runserver_plus"
 
-    : ${RUNSERVER_OPTS="runserver_plus 0.0.0.0:${RUNSERVERPORT} --settings=${DJANGO_SETTINGS_MODULE}"}
+    : "${RUNSERVER_OPTS=runserver_plus 0.0.0.0:${RUNSERVERPORT} --settings=${DJANGO_SETTINGS_MODULE}}"
     _runserver
 fi
 
@@ -195,7 +198,7 @@ fi
 if [ "$1" = 'grdr' ]; then
     echo "[Run] Starting runserver with GRDR data elements"
 
-    : ${RUNSERVER_OPTS="runserver_plus 0.0.0.0:${RUNSERVERPORT} --settings=${DJANGO_SETTINGS_MODULE}"}
+    : "${RUNSERVER_OPTS=runserver_plus 0.0.0.0:${RUNSERVERPORT} --settings=${DJANGO_SETTINGS_MODULE}}"
     echo "RUNSERVER_OPTS is ${RUNSERVER_OPTS}"
 
     _django_collectstatic
@@ -203,8 +206,7 @@ if [ "$1" = 'grdr' ]; then
     _django_fixtures
     _rdrf_import_grdr
 
-    echo "running runserver ..."
-    exec django-admin.py ${RUNSERVER_OPTS}
+    _runserver
 fi
 
 # runtests entrypoint
@@ -218,17 +220,17 @@ fi
 if [ "$1" = 'aloe_rdrf' ]; then
     echo "[Run] Starting RDRF aloe"
     cd /app/rdrf/rdrf
-    _aloe
+    _aloe "$@"
 fi
 
 # aloe ${PROJECT_NAME} entrypoint
 if [ "$1" = 'aloe' ]; then
     echo "[Run] Starting ${PROJECT_NAME} aloe"
-    cd /app/${PROJECT_NAME}
-    _aloe
+    cd /app/"${PROJECT_NAME}"
+    _aloe "$@"
 fi
 
 echo "[RUN]: Builtin command not provided [tarball|aloe|aloe_rdrf|runtests|runserver|uwsgi|uwsgi_fixtures]"
-echo "[RUN]: $@"
+echo "[RUN]: $*"
 
 exec "$@"
