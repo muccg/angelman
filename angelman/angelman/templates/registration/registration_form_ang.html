@@ -54,6 +54,11 @@
             var self = this;
             $("#patient-address-div").slideToggle("fast", function() {
                 !$(self).prop('checked');
+                $("#id_address").prop("disabled", !$("#id_address").prop("disabled"));
+                $("#id_suburb").prop("disabled", !$("#id_suburb").prop("disabled"));
+                $("#id_country").prop("disabled", !$("#id_country").prop("disabled"));
+                $("#id_state").prop("disabled", !$("#id_state").prop("disabled"));
+                $("#id_postcode").prop("disabled", !$("#id_postcode").prop("disabled"));
             });
         });
 
@@ -74,7 +79,7 @@
         
         $('#registration-form')
             .validate({
-                ignore: false,
+                ignore: ":disabled",
                 rules : {
                     parent_guardian_date_of_birth : {
                         dateFormat : true,
