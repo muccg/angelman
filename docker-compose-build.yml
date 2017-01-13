@@ -45,7 +45,4 @@ services:
       dockerfile: Dockerfile-prod
       args:
         ARG_GIT_TAG: ${GIT_TAG}
-        ARG_PIP_INDEX_URL: ${PIP_INDEX_URL}
-        ARG_PIP_TRUSTED_HOST: ${PIP_TRUSTED_HOST}
-        http_proxy:
     image: muccg/angelman:${GIT_TAG}
