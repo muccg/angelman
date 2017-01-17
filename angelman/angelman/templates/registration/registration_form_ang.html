@@ -68,6 +68,31 @@
             },
             "Please enter a date in the format yyyy-mm-dd"
         );
+
+
+        $.validator.addMethod("validdate", function (value) {
+            var m = value.match(/\s*(\d{4})-(\d{1,2})-(\d{1,2})\s*/);
+            if (m == null) {
+                return false;
+            }
+            var year = parseInt(m[1]);
+            var month = parseInt(m[2]);
+            var day = parseInt(m[3]);
+
+            function isLeapYear(year) {
+                return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+            }
+
+            function daysInMonth(year, month) {
+                if (month === 2 && isLeapYear(year)) {
+                    return 29;
+                }
+                return [31,28,31,30,31,30,31,31,30,31,30,31][month - 1];
+            }
+
+            return year >= 1900 && month >= 1 && month <= 12 && day >=1 && day <= daysInMonth(year, month);
+        }, "Please enter a valid date");
+    
         $.validator.addMethod(
             "dateCorrect",
             function(value, element) {
@@ -82,14 +107,17 @@
                 rules : {
                     parent_guardian_date_of_birth : {
                         dateFormat : true,
-                        dateCorrect : true
+			dateCorrect : true,
+			validdate: true
+										  
                     },
                     parent_guardian_phone : {
                     maxlength: 20
                     },
                     date_of_birth : {
                         dateFormat : true,
-                        dateCorrect : true
+                        dateCorrect : true,
+			validdate: true
                     },
                     country: {
                         selectcheck: true
