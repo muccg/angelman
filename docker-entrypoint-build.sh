@@ -1,5 +1,9 @@
 #!/bin/bash
 
+info () {
+    printf "\r  [\033[00;34mINFO\033[0m] %s\n" "$1"
+}
+
 trap exit SIGHUP SIGINT SIGTERM
 env | grep -iv PASS | sort
 
