@@ -71,6 +71,7 @@ runserver:
   environment:
     - DBUSER=rdrfapp
     - WAIT_FOR_DB=1
+    - WAIT_FOR_CLINICAL_DB=1
     - WAIT_FOR_CACHE=1
     - WAIT_FOR_MONGO=1
     - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
@@ -83,6 +84,7 @@ uwsgi:
   environment:
     - DBUSER=rdrfapp
     - WAIT_FOR_DB=1
+    - WAIT_FOR_CLINICAL_DB=1
     - WAIT_FOR_CACHE=1
     - WAIT_FOR_MONGO=1
     - WAIT_FOR_RUNSERVER=1
