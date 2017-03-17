@@ -47,6 +47,12 @@ function defaults {
     : "${DBUSER:=webapp}"
     : "${DBNAME:=${DBUSER}}"
     : "${DBPASS:=${DBUSER}}"
+    
+    : "${CLINICAL_DBSERVER:=clinicaldb}"
+    : "${CLINICAL_DBPORT:=5432}"
+    : "${CLINICAL_DBUSER:=webapp}"
+    : "${CLINICAL_DBNAME:=${CLINICAL_DBUSER}}"
+    : "${CLINICAL_DBPASS:=${CLINICAL_DBUSER}}"
 
     : "${DOCKER_ROUTE:=$(/sbin/ip route|awk '/default/ { print $3 }')}"
 
