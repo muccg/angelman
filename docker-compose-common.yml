@@ -1,98 +1,98 @@
-# data only container pattern
-datadev:
-  image: debian:jessie
-  volumes:
-    - .:/app
-    - ./data/dev:/data
+version: '2'
+services:
+  # data only container pattern
+  datadev:
+    image: debian:jessie
+    volumes:
+      - .:/app
+      - ./data/dev:/data
 
-datatest:
-  image: debian:jessie
-  volumes:
-    - .:/app
-    - ./data/tests:/data
+  datatest:
+    image: debian:jessie
+    volumes:
+      - .:/app
+      - ./data/tests:/data
 
-dataprodselenium:
-  image: debian:jessie
-  volumes:
-    - .:/app
-    - ./data/selenium/prod:/data
+  dataprodselenium:
+    image: debian:jessie
+    volumes:
+      - .:/app
+      - ./data/selenium/prod:/data
 
-datadevselenium:
-  image: debian:jessie
-  volumes:
-    - .:/app
-    - ./data/selenium/dev:/data
+  datadevselenium:
+    image: debian:jessie
+    volumes:
+      - .:/app
+      - ./data/selenium/dev:/data
 
-jasper:
-  image: muccg/jasper-reports-server:6.1.1
-  command: development
-  ports:
-    - "8080"
-  #links:
-  #  - db:db
-  environment:
-    - DB_HOST=db
-    - DB_PORT=5432
-    - DB_NAME=rdrfapp
-    - DB_USERNAME=rdrfapp
-    - DB_PASSWORD=rdrfapp
-    - WAIT_FOR_DB=1
+  jasper:
+    image: muccg/jasper-reports-server:6.1.1
+    command: development
+    ports:
+      - "8080"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=rdrfapp
+      - DB_USERNAME=rdrfapp
+      - DB_PASSWORD=rdrfapp
+      - WAIT_FOR_DB=1
 
-db:
-  image: muccg/postgres-ssl:9.4
-  environment:
-    - POSTGRES_USER=rdrfapp
-    - POSTGRES_PASSWORD=rdrfapp
-  ports:
-    - "5432"
+  db:
+    image: muccg/postgres-ssl:9.4
+    environment:
+      - POSTGRES_USER=rdrfapp
+      - POSTGRES_PASSWORD=rdrfapp
+    ports:
+      - "5432"
 
-cache:
-  image: memcached:1.4
+  cache:
+    image: memcached:1.4
 
-mongo:
-  image: mongo:3.0
-  command: mongod --smallfiles
+  mongo:
+    image: mongo:3.0
+    command: mongod --smallfiles
 
-triplestore:
-  image: muccg/allegro:4.14.1
-  ports:
-    - "10035"
+  triplestore:
+    image: muccg/allegro:4.14.1
+    ports:
+      - "10035"
 
-nginx:
-  image: muccg/nginx-uwsgi:1.10
-  ports:
-    - "8443:443"
-    - "8080:80"
-  volumes:
-    - ./data/nginx:/data
+  nginx:
+    image: muccg/nginx-uwsgi:1.10
+    ports:
+      - "8443:443"
+      - "8080:80"
+    volumes:
+      - ./data/nginx:/data
 
-runserver:
-  image: muccg/angelman-dev
-  environment:
-    - DBUSER=rdrfapp
-    - WAIT_FOR_DB=1
-    - WAIT_FOR_CLINICAL_DB=1
-    - WAIT_FOR_CACHE=1
-    - WAIT_FOR_MONGO=1
-    - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
-    - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
-    - DJANGO_MAILGUN_API_KEY=${DJANGO_MAILGUN_API_KEY}
+  runserver:
+    image: muccg/angelman-dev
+    environment:
+      - DBUSER=rdrfapp
+      - WAIT_FOR_DB=1
+      - WAIT_FOR_CLINICAL_DB=1
+      - WAIT_FOR_CACHE=1
+      - WAIT_FOR_MONGO=1
+      - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+      - DJANGO_MAILGUN_API_KEY=${DJANGO_MAILGUN_API_KEY}
 
-uwsgi:
-  image: muccg/angelman-dev
-  command: uwsgi_local
-  environment:
-    - DBUSER=rdrfapp
-    - WAIT_FOR_DB=1
-    - WAIT_FOR_CLINICAL_DB=1
-    - WAIT_FOR_CACHE=1
-    - WAIT_FOR_MONGO=1
-    - WAIT_FOR_RUNSERVER=1
-    - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
-    - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+  uwsgi:
+    image: muccg/angelman-dev
+    command: uwsgi_local
+    environment:
+      - DBUSER=rdrfapp
+      - WAIT_FOR_DB=1
+      - WAIT_FOR_CLINICAL_DB=1
+      - WAIT_FOR_CACHE=1
+      - WAIT_FOR_MONGO=1
+      - WAIT_FOR_RUNSERVER=1
+      - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
     # note: important to wait for runserver in dev as both will attempt to syncdb etc
-  ports:
-    - "9000:9000"
-    - "9001:9001"
-    - "9100:9100"
-    - "9101:9101"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+      - "9100:9100"
+      - "9101:9101"
