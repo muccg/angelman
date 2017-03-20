@@ -9,6 +9,15 @@ dbprod:
     file: docker-compose-common.yml
     service: db
 
+dbclinicalprod:
+    extends:
+    file: docker-compose-common.yml
+    service: db
+    networks:
+      default:
+        aliases:
+          - dbclinicaltest
+
 cacheprod:
   extends:
     file: docker-compose-common.yml
