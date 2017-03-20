@@ -1,59 +1,65 @@
-# data only container pattern
-datadev:
-  extends:
-    file: docker-compose-common.yml
-    service: datadev
+version: '2'
+services:
+  # data only container pattern
+  datadev:
+    extends:
+      file: docker-compose-common.yml
+      service: datadev
 
-db:
-  extends:
-    file: docker-compose-common.yml
-    service: db
-
-clinicaldb:
+  db:
     extends:
       file: docker-compose-common.yml
       service: db
 
-cache:
-  extends:
-    file: docker-compose-common.yml
-    service: cache
+  clinicaldb:
+    extends:
+      file: docker-compose-common.yml
+      service: db
 
-mongo:
-  extends:
-    file: docker-compose-common.yml
-    service: mongo
+  cache:
+    extends:
+      file: docker-compose-common.yml
+      service: cache
 
-nginx:
-  extends:
-    file: docker-compose-common.yml
-    service: nginx
-  links:
+  mongo:
+    extends:
+      file: docker-compose-common.yml
+      service: mongo
+
+  nginx:
+    extends:
+      file: docker-compose-common.yml
+      service: nginx
+    depends_on:
     - uwsgi
 
-runserver:
-  extends:
-    file: docker-compose-common.yml
-    service: runserver
-  volumes_from:
-    - datadev
-  links:
-    - db
-    - clinicaldb
-    - cache
-    - mongo
-  ports:
-    - "8000:8000"
-
-uwsgi:
-  extends:
-    file: docker-compose-common.yml
-    service: uwsgi
-  volumes_from:
-    - datadev
-  links:
-    - db
-    - clinicaldb
-    - cache
-    - mongo
-    - runserver:web
+  runserver:
+    extends:
+      file: docker-compose-common.yml
+      service: runserver
+    environment:
+      - DJANGO_FIXTURES=dev
+    volumes_from:
+      - datadev
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - clinicaldb
+      - cache
+      - mongo
+    networks:
+      default:
+        aliases:
+        - web
+  uwsgi:
+    extends:
+      file: docker-compose-common.yml
+      service: uwsgi
+    volumes_from:
+      - datadev
+    depends_on:
+      - db
+      - clinicaldb
+      - cache
+      - mongo
