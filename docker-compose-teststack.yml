@@ -35,7 +35,7 @@ services:
     command: runserver
     environment:
       - DJANGO_FIXTURES=test
-      - ALLOWEHOSTS=*
+      - ALLOWED_HOSTS=*
       - CACHESERVER=cachetest
       - DBSERVER=dbtest
       - CLINICAL_DBSERVER=dbclinicaltest
