@@ -50,7 +50,7 @@ function defaults {
     
     : "${CLINICAL_DBSERVER:=clinicaldb}"
     : "${CLINICAL_DBPORT:=5432}"
-    : "${CLINICAL_DBUSER:=webapp}"
+    : "${CLINICAL_DBUSER:=rdrfapp}"
     : "${CLINICAL_DBNAME:=${CLINICAL_DBUSER}}"
     : "${CLINICAL_DBPASS:=${CLINICAL_DBUSER}}"
 
