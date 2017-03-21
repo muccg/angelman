@@ -264,7 +264,7 @@ if [ "$1" = 'runtests' ]; then
 fi
 
 # aloe RDRF entrypoint
-if [ "()" = 'aloe_rdrf' ]; then
+if [ "$1" = 'aloe_rdrf' ]; then
     echo "[Run] Starting RDRF aloe"
     cd /app/rdrf/rdrf
     _aloe "$@"
