@@ -16,7 +16,6 @@ services:
     image: muccg/angelman-dev
     command: aloe
     environment:
-      - DBUSER=rdrfapp
       - WAIT_FOR_RUNSERVER=1
       - WAIT_FOR_DB=1
       - WAIT_FOR_CLINICAL_DB=1
@@ -28,6 +27,7 @@ services:
       - CLINICAL_DBSERVER=dbclinicaltest
       - DBSERVER=dbtest
       - CACHESERVER=cachetest
+      - MONGOSERVER=mongotest
     volumes_from:
       - datadevselenium
 
@@ -36,7 +36,6 @@ services:
     image: muccg/angelman-dev
     command: aloe
     environment:
-      - DBUSER=rdrfapp
       - WAIT_FOR_UWSGI=1
       - WAIT_FOR_DB=1
       - WAIT_FOR_CLINICAL_DB=1

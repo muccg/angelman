@@ -66,8 +66,6 @@ services:
       - DBSERVER=dbprod
       - CLINICAL_DBSERVER=dbclinicalprod
       - MONGOSERVER=mongoprod
-      - DBUSER=rdrfapp
-      - DEPLOYMENT=test
     volumes:
       - uwsgi-prod-data:/data
     depends_on:

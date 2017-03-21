@@ -52,6 +52,7 @@ services:
       default:
         aliases:
         - web
+
   uwsgi:
     extends:
       file: docker-compose-common.yml

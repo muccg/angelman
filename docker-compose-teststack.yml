@@ -39,7 +39,6 @@ services:
       - CACHESERVER=cachetest
       - DBSERVER=dbtest
       - CLINICAL_DBSERVER=dbclinicaltest
-      - DEPLOYMENT=test
       - MONGOSERVER=mongotest
     depends_on:
       - dbtest
