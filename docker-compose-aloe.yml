@@ -1,53 +1,57 @@
-#
-datadevselenium:
-  extends:
-    file: docker-compose-common.yml
-    service: datadevselenium
+version: '2'
+services:
 
-dataprodselenium:
-  extends:
-    file: docker-compose-common.yml
-    service: dataprodselenium
+  datadevselenium:
+    extends:
+      file: docker-compose-common.yml
+      service: datadevselenium
+
+  dataprodselenium:
+    extends:
+      file: docker-compose-common.yml
+      service: dataprodselenium
+
+  # runs the aloe tests against docker-compose-teststack.yml 
+  teststack:
+    image: muccg/angelman-dev
+    command: aloe
+    environment:
+      - WAIT_FOR_RUNSERVER=1
+      - WAIT_FOR_DB=1
+      - WAIT_FOR_CLINICAL_DB=1
+      - WAIT_FOR_MONGO=1
+      - TEST_WAIT=10
+      - TEST_BROWSER=chrome
+      - DEBUG=0
+      - RUNSERVER=runservertest
+      - CLINICAL_DBSERVER=dbclinicaltest
+      - DBSERVER=dbtest
+      - CACHESERVER=cachetest
+      - MONGOSERVER=mongotest
+    volumes_from:
+      - datadevselenium
 
 # runs the aloe tests against docker-compose-teststack.yml
-teststack:
-  image: muccg/angelman-dev
-  command: aloe
-  environment:
-    - DBUSER=rdrfapp
-    - WAIT_FOR_RUNSERVER=1
-    - WAIT_FOR_DB=1
-    - WAIT_FOR_MONGO=1
-    - TEST_WAIT=10
-    - TEST_BROWSER=chrome
-    - DEBUG=0
-  volumes_from:
-    - datadevselenium
-  external_links:
-    - angelman_runservertest_1:web
-    - angelman_seleniumhub_1:hub
-    - angelman_dbtest_1:db
-    - angelman_mongotest_1:mongo
-
-# runs the aloe tests against docker-compose-teststack.yml
-prod:
-  image: muccg/angelman-dev
-  command: aloe
-  environment:
-    - DBUSER=rdrfapp
-    - WAIT_FOR_UWSGI=1
-    - WAIT_FOR_DB=1
-    - WAIT_FOR_MONGO=1
-    - TEST_APP_PORT=8443
-    - TEST_APP_SCHEME=https
-    - TEST_APP_PATH=/app/
-    - TEST_WAIT=10
-    - TEST_BROWSER=chrome
-    - DEBUG=0
-  volumes_from:
-    - dataprodselenium
-  external_links:
-    - angelman_uwsgiprod_1:uwsgi
-    - angelman_seleniumhub_1:hub
-    - angelman_dbprod_1:db
-    - angelman_mongoprod_1:mongo
+  prod:
+    image: muccg/angelman-dev
+    command: aloe
+    environment:
+      - WAIT_FOR_UWSGI=1
+      - WAIT_FOR_DB=1
+      - WAIT_FOR_CLINICAL_DB=1
+      - WAIT_FOR_MONGO=1
+      - TEST_APP_HOST=nginxtest
+      - TEST_APP_PORT=443
+      - TEST_APP_SCHEME=https
+      - TEST_APP_PATH=/app/
+      - TEST_WAIT=10
+      - TEST_BROWSER=chrome
+      - DEBUG=0
+      - RUNSERVER=runservertest
+      - CLINICAL_DBSERVER=dbclinicaltest
+      - DBSERVER=dbtest
+      - CACHESERVER=cachetest
+      - MONGOSERVER=mongotest
+      - UWSGISERVER=uwsgitest
+    volumes_from:
+      - dataprodselenium

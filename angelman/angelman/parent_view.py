@@ -184,6 +184,20 @@ class ParentView(BaseParentView):
         parent.patient.add(patient)
         parent.save()
 
+        # ParentGuardian doesn't have working group?
+        # Hence we assign the working group of a newly created
+        # patient based on the working group of the first registered patient
+        registered_patient_working_group = None
+        for p in parent.patient.all():
+         wg = p.working_groups.first()
+         if wg:
+             registered_patient_working_group = wg
+             break
+
+        if registered_patient_working_group:
+            patient.working_groups.add(registered_patient_working_group)
+            patient.save()
+
         if request.POST['clinician'] == 'clinician-other':
             ClinicianOther.objects.create(
                 patient = patient,
