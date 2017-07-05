@@ -1,5 +1,6 @@
 from registry.groups.patient_registration.base import BaseRegistration
 from rdrf.email_notification import process_notification
+from rdrf.events import EventType
 from registration.models import RegistrationProfile
 from registry.patients.models import AddressType
 from registry.patients.models import ClinicianOther
@@ -18,8 +19,10 @@ class AngelmanRegistration(BaseRegistration, object):
     def process(self,):
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
+        preferred_language = self.request.POST["preferred_language"]
 
         user = self._create_django_user(self.request, self.user, registry, is_parent=True)
+        user.preferred_language = preferred_language
 
         try:
             clinician_id, working_group_id = self.request.POST['clinician'].split("_")
@@ -64,7 +67,7 @@ class AngelmanRegistration(BaseRegistration, object):
             "parent": parent_guardian,
             "registration": RegistrationProfile.objects.get(user=user)
         }
-        process_notification(registry_code, settings.EMAIL_NOTE_NEW_PATIENT, self.request.LANGUAGE_CODE, template_data)
+        process_notification(registry_code, EventType.NEW_PATIENT, template_data)
 
         if "clinician-other" in self.request.POST['clinician']:
             other_clinician = ClinicianOther.objects.create(
@@ -81,7 +84,7 @@ class AngelmanRegistration(BaseRegistration, object):
                 "parent": parent_guardian
             }
             process_notification(
-                registry_code, settings.EMAIL_NOTE_OTHER_CLINICIAN, self.request.LANGUAGE_CODE, template_data)
+                registry_code, EventType.OTHER_CLINICIAN, template_data)
 
     def _create_parent(self, request):
         parent_guardian = ParentGuardian.objects.create(
