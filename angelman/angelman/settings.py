@@ -4,6 +4,7 @@ from rdrf.settings import *
 # and translations of fkrp get loaded first.
 
 FALLBACK_REGISTRY_CODE = "angelman"
+LOCALE_PATHS = env.getlist("locale_paths", ['/data/translations/locale'])
 
 INSTALLED_APPS = [
     FALLBACK_REGISTRY_CODE,

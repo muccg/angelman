@@ -18,6 +18,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js"></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 
     <style>
         body {
@@ -186,11 +187,11 @@
         </div>
         {% endif %}
         <h3>
-            <strong>Angelman Registry - Parent Registration</strong>
+            <strong>{% trans "Angelman Registry - Parent Registration" %}</strong>
         </h3>
         <div id="underage_msg">
             <div class="alert alert-danger">
-                For legal reasons you must be 18 or over in order to register here. If you are the parent or guardian of a child that you would like to register as a patient, please enter your own data in this first step. You will be asked for the patient’s data in a later step. If you are a patient who is under 18, please get your parent or guardian to fill in this form with you.
+                {% trans "For legal reasons you must be 18 or over in order to register here. If you are the parent or guardian of a child that you would like to register as a patient, please enter your own data in this first step. You will be asked for the patient’s data in a later step. If you are a patient who is under 18, please get your parent or guardian to fill in this form with you." %}
             </div>            
         </div>
 
@@ -206,7 +207,7 @@
             <div class="version">{% registry_version 'angelman' %}</div>
             <small>
             <p class="text-justify text-muted">
-            Privacy Statement - All information we receive from you will be treated confidentially and will be encrypted and stored on a secure server. Only de-identified health information will be made accessible to qualified researchers who are granted permission by the Steering committee.
+            {% trans "Privacy Statement - All information we receive from you will be treated confidentially and will be encrypted and stored on a secure server. Only de-identified health information will be made accessible to qualified researchers who are granted permission by the Steering committee." %}
             </p>
             </small>
         </div>
