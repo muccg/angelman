@@ -194,13 +194,16 @@
                     <div class="alert alert-danger" id="password-error">
                     </div>
                 </div>
-		<div class="form-group">
+		{% if preferred_languages %}
+                <div class="form-group">
                     <select class="form-control" name="preferred_language" id="id_preferred_language" required>
                         <option value=0>{% trans "Preferred language for communication" %}</option>
-                        <option value="en">{% trans "English" %}</option>
-                        <option value="de">{% trans "German" %}</option>
+		        {% for preferred_language in preferred_languages %}
+                            <option value="{{ preferred_language.code }}">{% trans preferred_language.name %}</option>
+			{% endfor %}
                     </select>
                 </div>
+		{% endif %}
             </div>
         </div>
 
