@@ -23,6 +23,7 @@ node {
         echo "Branch is: ${env.BRANCH_NAME}"
         echo "Build is: ${env.BUILD_NUMBER}"
         sh('''
+            ./develop.sh sanity
             ./develop.sh build base
             ./develop.sh build builder
             ./develop.sh build dev
