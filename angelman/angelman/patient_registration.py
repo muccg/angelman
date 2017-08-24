@@ -19,7 +19,7 @@ class AngelmanRegistration(BaseRegistration, object):
     def process(self,):
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
-        preferred_language = self.request.POST["preferred_language"]
+        preferred_language = self.request.POST.get("preferred_language", "en")
 
         user = self._create_django_user(self.request, self.user, registry, is_parent=True)
         user.preferred_language = preferred_language
