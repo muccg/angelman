@@ -58,7 +58,7 @@
                     If you haven't got a user account yet, you can create one by going to <a href="https://angelmanregistry.info/">https://angelmanregistry.info</a> and clicking 'Register Now'. 
                 </p>
                 <p>
-                    If you have forgotten your password, please click on 'forgotten your password?'
+                    If you have forgotten your password, please click on 'Trouble signing in?'
                 </p>
             </div>
     
@@ -95,13 +95,13 @@
                         {% endif %}
                       </div>
                 </div>
-                
-                <div class="panel-footer">
-                    <a href="{% url 'password_reset' %}">Forgotten your password?</a>
+
+                 <div class="panel-footer">
+                    <a href="{% url 'login_assistance' %}">{% trans "Trouble signing in?" %}</a>
                     <input type="submit" class="btn btn-success pull-right" value="{% trans 'Log in' %}" />
                     <div class="clearfix"></div>
                 </div>
-            
+
             </div>
         
         </div>
