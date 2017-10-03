@@ -6,8 +6,8 @@ Feature: Automated tests to ensure correctness of Angelman
         Given a registry named "Angelman"
 
     Scenario: Try to register as a parent for Angelman
-        When I try to register as an "Angelman" user
-        Then I should have successfully registered
+        When I try to register as an "Angelman" user called "John Smith" using the email address "sample@email.com" and the password "admin123"
+        Then I should have successfully registered and would see a "Thank you for registration" message
 
         When I try to log in
         When I log in as "admin" with "admin" password
@@ -16,5 +16,5 @@ Feature: Automated tests to ensure correctness of Angelman
 
         When I try to log in
         When I log in as "sample@email.com" with "admin123" password
-        When I login as an Angelman user "John Smith"
-        Then I should be at the angelman registry landing page
+        Then I should be logged in as an Angelman user called "John Smith"
+        Then I should be at the welcome page and see a message which says "Welcome John Smith to the Angelman Registry"
