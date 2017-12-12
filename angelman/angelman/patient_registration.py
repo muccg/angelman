@@ -3,7 +3,6 @@ from rdrf.email_notification import process_notification
 from rdrf.events import EventType
 from registration.models import RegistrationProfile
 from registry.patients.models import AddressType
-from registry.patients.models import ClinicianOther
 from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
@@ -23,18 +22,11 @@ class AngelmanRegistration(BaseRegistration, object):
 
         user = self._create_django_user(self.request, self.user, registry, is_parent=True)
         user.preferred_language = preferred_language
+        # Initially UNALLOCATED
+        working_group, status = WorkingGroup.objects.get_or_create(name=self._UNALLOCATED_GROUP,
+                                                                   registry=registry)
 
-        try:
-            clinician_id, working_group_id = self.request.POST['clinician'].split("_")
-            clinician = CustomUser.objects.get(id=clinician_id)
-            working_group = WorkingGroup.objects.get(id=working_group_id)
-            user.working_groups = [working_group, ]
-        except ValueError:
-            clinician = None
-            working_group, status = WorkingGroup.objects.get_or_create(
-                name=self._UNALLOCATED_GROUP, registry=registry)
-            user.working_groups = [working_group, ]
-
+        user.working_groups = [working_group,]
         user.save()
 
         patient = Patient.objects.create(
@@ -47,7 +39,6 @@ class AngelmanRegistration(BaseRegistration, object):
 
         patient.rdrf_registry.add(registry.id)
         patient.working_groups.add(working_group.id)
-        patient.clinician = clinician
         patient.home_phone = self.request.POST["phone_number"]
         patient.email = user.username
         patient.user = None
@@ -67,24 +58,8 @@ class AngelmanRegistration(BaseRegistration, object):
             "parent": parent_guardian,
             "registration": RegistrationProfile.objects.get(user=user)
         }
-        process_notification(registry_code, EventType.NEW_PATIENT, template_data)
 
-        if "clinician-other" in self.request.POST['clinician']:
-            other_clinician = ClinicianOther.objects.create(
-                patient=patient,
-                clinician_name=self.request.POST.get("other_clinician_name"),
-                clinician_hospital=self.request.POST.get("other_clinician_hospital"),
-                clinician_address=self.request.POST.get("other_clinician_address"),
-                clinician_phone_number=self.request.POST.get("other_clinician_phone_number"),
-                clinician_email=self.request.POST.get("other_clinician_email")
-            )
-            template_data = {
-                "other_clinician": other_clinician,
-                "patient": patient,
-                "parent": parent_guardian
-            }
-            process_notification(
-                registry_code, EventType.OTHER_CLINICIAN, template_data)
+        process_notification(registry_code, EventType.NEW_PATIENT, template_data)
 
     def _create_parent(self, request):
         parent_guardian = ParentGuardian.objects.create(
