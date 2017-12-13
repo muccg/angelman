@@ -244,6 +244,12 @@ class ParentEditView(BaseParentView):
         else:
             messages.add_message(request, messages.ERROR, "Please correct the errors bellow")
 
+
+        # clinician data - to do - better to make this a form?
+
+        clinician_form = ClinicianForm(request.POST)
+        
+
         context['parent'] = parent
         context['registry_code'] = registry_code
         context['parent_form'] = parent_form
