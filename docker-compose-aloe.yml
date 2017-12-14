@@ -28,8 +28,8 @@ services:
       - DBSERVER=dbtest
       - CACHESERVER=cachetest
       - MONGOSERVER=mongotest
-      - RECAPTCHA_SITEKEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
-      - RECAP6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
+      - RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+      - RECAPTCHA_SECRET_KEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
     volumes_from:
       - datadevselenium
 
@@ -55,7 +55,7 @@ services:
       - CACHESERVER=cachetest
       - MONGOSERVER=mongotest
       - UWSGISERVER=uwsgitest
-      - RECAPTCHA_SITEKEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
-      - RECAP6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
+      - RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+      - RECAPTCHA_SECRET_KEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
     volumes_from:
       - dataprodselenium
