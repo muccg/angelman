@@ -15,6 +15,11 @@ services:
     extends:
       file: docker-compose-common.yml
       service: db
+      
+  reportingdb:
+    extends:
+      file: docker-compose-common.yml
+      service: db
 
   cache:
     extends:
@@ -46,6 +51,7 @@ services:
     depends_on:
       - db
       - clinicaldb
+      - reportingdb
       - cache
       - mongo
     networks:
@@ -62,5 +68,6 @@ services:
     depends_on:
       - db
       - clinicaldb
+      - reportingdb
       - cache
       - mongo
