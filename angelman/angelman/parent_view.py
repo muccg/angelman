@@ -163,8 +163,6 @@ class ParentView(BaseParentView):
         )
         patient.rdrf_registry.add(registry)
 
-        clinician, centre = self.get_clinician_centre(request, registry)
-        patient.clinician = clinician
         patient.save()
 
         use_parent_address = "use_parent_address" in request.POST
@@ -197,16 +195,6 @@ class ParentView(BaseParentView):
         if registered_patient_working_group:
             patient.working_groups.add(registered_patient_working_group)
             patient.save()
-
-        if request.POST['clinician'] == 'clinician-other':
-            ClinicianOther.objects.create(
-                patient = patient,
-                clinician_name = request.POST.get('other_clinician_name'),
-                clinician_hospital = request.POST.get('other_clinician_hospital'),
-                clinician_address = request.POST.get('other_clinician_address'),
-                clinician_email = request.POST.get('other_clinician_email'),
-                clinician_phone_number = request.POST.get('other_clinician_phone_number')
-            )
 
         messages.add_message(request, messages.SUCCESS, 'Patient added successfully')
         return redirect(reverse("parent_page", args={registry_code: registry_code}))
@@ -244,11 +232,6 @@ class ParentEditView(BaseParentView):
         else:
             messages.add_message(request, messages.ERROR, "Please correct the errors bellow")
 
-
-        # clinician data - to do - better to make this a form?
-
-        clinician_form = ClinicianForm(request.POST)
-        
 
         context['parent'] = parent
         context['registry_code'] = registry_code

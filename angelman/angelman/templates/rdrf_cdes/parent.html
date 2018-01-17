@@ -13,35 +13,11 @@
         }
     
         $(document).ready(function(){
-            $("#form-other-clinician").hide();
             
-            $("#id_clinician").on('change', function() {
-                if(this.value === "clinician-other") {
-                    $("#form-other-clinician").slideToggle();
-                    $("#id_other_clinician_name").prop('required', true);
-                    $("#id_other_clinician_hospital").prop('required', true);
-                    $("#id_other_clinician_address").prop('required', true);
-                    
-                } else {
-                    $("#form-other-clinician").slideUp();
-                    $("#id_other_clinician_name").prop('required', false);
-                    $("#id_other_clinician_hospital").prop('required', false);
-                    $("#id_other_clinician_address").prop('required', false);
-                }
-            });
-
             $("#id_date_of_birth").datepicker({
                 "dateFormat": "yy-mm-dd"
             });
             
-            $.get("{% url 'v1:clinician-list' registry_code %}", function(data) {
-                clinician_drop = $("#id_clinician");
-                $.each(data, function(i, item){
-                    clinician_drop.append($('<option>', { value : item.id }).text(item.full_name)); 
-                });
-                clinician_drop.append($('<option>', { value : 'clinician-other' }).text('Other - not listed'));
-            });
-
             $("#registration-cancel").click(function() {
                 $("#new-patient-form").slideUp();
             });
@@ -134,48 +110,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label for="clinician" class="col-sm-2 control-label">{% trans 'Clinician' %}</label>
-                                <div class="col-sm-10">
-                                    <select class="form-control" id="id_clinician" name="clinician" required>
-                                        <option value="-1">{% trans 'Choose your preferred Clinician' %}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div id="form-other-clinician">
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">{% trans "Name" %}</label>
-                                    <div class="col-sm-10">
-                                        <input class="form-control" placeholder="Clinician's Name" id="id_other_clinician_name" name="other_clinician_name" type="text" />
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">{% trans "Hospital" %}</label>
-                                    <div class="col-sm-10">
-                                        <input class="form-control" placeholder="Clinician's Hospital" id="id_other_clinician_hospital" name="other_clinician_hospital" type="text" />
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">{% trans "Address" %}</label>
-                                    <div class="col-sm-10">
-                                        <input class="form-control" placeholder="Clinician's or Hospital's Address" id="id_other_clinician_address" name="other_clinician_address" type="text" />
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">{% trans "Phone Number" %}</label>
-                                    <div class="col-sm-10">
-                                        <input class="form-control" placeholder="Clinician's Phone Number" id="id_other_clinician_phone_number" name="other_clinician_phone_number" type="text" />
-                                    </div>
-                                </div>
-                                <div class="form-group bottom-separator">
-                                    <label class="col-sm-2 control-label">{% trans "Email" %}</label>
-                                    <div class="col-sm-10">
-                                        <input class="form-control" placeholder="Clinician's Email" id="id_other_clinician_email" name="other_clinician_email" type="text" />
-                                    </div>
-                                </div>
-                                <hr/>
-                            </div>
-        
+                           
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">{% trans "Use parent's address?" %}</label>
                                 <div class="col-sm-10">
