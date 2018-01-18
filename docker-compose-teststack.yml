@@ -15,6 +15,11 @@ services:
     extends:
       file: docker-compose-common.yml
       service: db
+      
+  dbreportingtest:
+    extends:
+      file: docker-compose-common.yml
+      service: db
 
   cachetest:
     extends:
@@ -39,6 +44,8 @@ services:
       - CACHESERVER=cachetest
       - DBSERVER=dbtest
       - CLINICAL_DBSERVER=dbclinicaltest
+      - REPORTING_DBSERVER=dbreportingtest
+      
       - MONGOSERVER=mongotest
       # https://developers.google.com/recaptcha/docs/faq
       - RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
@@ -46,6 +53,7 @@ services:
     depends_on:
       - dbtest
       - dbclinicaltest
+      - dbreportingtest
       - cachetest
       - mongotest
     ports:
