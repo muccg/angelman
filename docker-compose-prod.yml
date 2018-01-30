@@ -38,15 +38,6 @@ services:
         aliases:
           - cachetest
 
-  mongoprod:
-    extends:
-      file: docker-compose-common.yml
-      service: mongo
-    networks:
-      default:
-        aliases:
-          - mongotest
-
   nginxprod:
     extends:
       file: docker-compose-common.yml
@@ -67,14 +58,12 @@ services:
       - WAIT_FOR_CLINICAL_DB=1
       - WAIT_FOR_REPORTING_DB=1
       - WAIT_FOR_CACHE=1
-      - WAIT_FOR_MONGO=1
       - DJANGO_FIXTURES=test
       - ALLOWED_HOSTS=*
       - CSRF_TRUSTED_ORIGINS=localhost nginxtest
       - CACHESERVER=cacheprod
       - DBSERVER=dbprod
       - CLINICAL_DBSERVER=dbclinicalprod
-      - MONGOSERVER=mongoprod
       - REPORTING_DBSERVER=dbreportingprod
     volumes:
       - uwsgi-prod-data:/data
@@ -82,7 +71,6 @@ services:
       - dbprod
       - dbclinicalprod
       - cacheprod
-      - mongoprod
     ports:
       - "8433:8433"
     networks:

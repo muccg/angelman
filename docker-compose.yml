@@ -26,11 +26,6 @@ services:
       file: docker-compose-common.yml
       service: cache
 
-  mongo:
-    extends:
-      file: docker-compose-common.yml
-      service: mongo
-
   nginx:
     extends:
       file: docker-compose-common.yml
@@ -53,7 +48,6 @@ services:
       - clinicaldb
       - reportingdb
       - cache
-      - mongo
     networks:
       default:
         aliases:
@@ -70,4 +64,3 @@ services:
       - clinicaldb
       - reportingdb
       - cache
-      - mongo
