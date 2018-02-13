@@ -13,11 +13,6 @@ cachestaging:
     file: docker-compose-common.yml
     service: cache
 
-mongostaging:
-  extends:
-    file: docker-compose-common.yml
-    service: mongo
-
 uwsgistaging:
   image: muccg/angelman:next_release
   command: uwsgi
@@ -25,10 +20,8 @@ uwsgistaging:
     - DBSERVER=dbstaging
     - DBUSER=rdrfapp
     - CACHESERVER=cachestaging
-    - MONGOSERVER=mongostaging
     - WAIT_FOR_DB=1
     - WAIT_FOR_CACHE=1
-    - WAIT_FOR_MONGO=1
     - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
     - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
   volumes_from:
@@ -39,4 +32,3 @@ uwsgistaging:
   links:
     - dbstaging
     - cachestaging
-    - mongostaging

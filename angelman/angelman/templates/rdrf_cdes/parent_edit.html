@@ -22,13 +22,6 @@
                 });
             });
             
-            $.get("{% url 'v1:clinician-list' registry_code %}", function(data) {
-                clinician_drop = $("#id_clinician");
-                $.each(data, function(i, item){
-                    clinician_drop.append($('<option>', { value : item.id }).text(item.full_name)); 
-                });
-                clinician_drop.append($('<option>', { value : 'clinician-other' }).text('Other - not listed'));
-            });
         });
         
         function select_country(obj) {
@@ -67,6 +60,7 @@
                 </div>
             </div>
         {% endfor %}
+	    
         <div class="form-group">
             <div class="col-md-10">
                 <input type="submit" class="btn btn-success pull-right" value="{% trans 'Save' %}">

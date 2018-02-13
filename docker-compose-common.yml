@@ -49,15 +49,6 @@ services:
   cache:
     image: memcached:1.4
 
-  mongo:
-    image: mongo:3.0
-    command: mongod --smallfiles
-
-  triplestore:
-    image: muccg/allegro:4.14.1
-    ports:
-      - "10035"
-
   nginx:
     image: muccg/nginx-uwsgi:1.10
     ports:
@@ -73,7 +64,6 @@ services:
       - WAIT_FOR_CLINICAL_DB=1
       - WAIT_FOR_REPORTING_DB=1
       - WAIT_FOR_CACHE=1
-      - WAIT_FOR_MONGO=1
       - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
       - DJANGO_MAILGUN_API_KEY=${DJANGO_MAILGUN_API_KEY}
@@ -85,7 +75,6 @@ services:
       - WAIT_FOR_DB=1
       - WAIT_FOR_CLINICAL_DB=1
       - WAIT_FOR_CACHE=1
-      - WAIT_FOR_MONGO=1
       - WAIT_FOR_RUNSERVER=1
       - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
