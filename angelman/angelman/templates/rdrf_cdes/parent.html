@@ -209,7 +209,11 @@
                                     <option value="{% url 'clinician_form_view' registry_code patient.patient.id %}">{% trans 'Clinician' %}</option>
                                         {% for form in patient.forms %}
                                             <option value="{% url 'registry_form' registry_code form.form.id patient.patient.id patient.context_id %}">
+					        {% if form.form.has_progress %}
                                                 {{form.progress}}%
+						{% else %}
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						{% endif %}
                                                 {% if form.current %}
                                                     &#10004;
                                                 {% else %}
