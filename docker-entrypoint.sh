@@ -261,7 +261,7 @@ fi
 # aloe RDRF entrypoint
 if [ "$1" = 'aloe_rdrf' ]; then
     echo "[Run] Starting RDRF aloe"
-    cd /app/rdrf/rdrf
+    cd /app/rdrf/rdrf/rdrf/testing/behaviour
     _aloe "$@"
 fi
 

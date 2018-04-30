@@ -14,17 +14,17 @@ from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
 from registry.patients.models import ClinicianOther
-from rdrf.models import ConsentQuestion
-from rdrf.models import ConsentSection
-from rdrf.models import Registry
-from rdrf.models import RegistryForm
+from rdrf.models.definition.models import ConsentQuestion
+from rdrf.models.definition.models import ConsentSection
+from rdrf.models.definition.models import Registry
+from rdrf.models.definition.models import RegistryForm
 from registry.patients.admin_forms import ParentGuardianForm
-from rdrf.utils import consent_status_for_patient
-from rdrf import form_progress
+from rdrf.helpers.utils import consent_status_for_patient
+from rdrf.forms.progress import form_progress
 
-from rdrf.utils import consent_status_for_patient
+from rdrf.helpers.utils import consent_status_for_patient
 
-from rdrf.contexts_api import RDRFContextManager, RDRFContextError
+from rdrf.db.contexts_api import RDRFContextManager, RDRFContextError
 
 from registry.groups.models import WorkingGroup
 import logging
