@@ -36,7 +36,10 @@ node {
         sh('./develop.sh run-unittests')
     }
 
-    artifacts = ['**/data/selenium/dev/scratch/*.png', '**/data/selenium/dev/log/*.log']
+     artifacts = ['**/data/selenium/dev/scratch/*.png',
+                  '**/data/selenium/dev/log/*.log',
+                  'aloe-teststack.log',
+                  'aloe-selenium.log']
     testResults = ['**/data/selenium/dev/scratch/*.xml']
     dockerStage('Dev RDRF aloe', artifacts, testResults) {
         sh('./develop.sh aloe teststack aloe_rdrf')
@@ -56,7 +59,10 @@ node {
             ''')
         }
 
-        artifacts = ['**/data/selenium/prod/scratch/*.png', '**/data/selenium/prod/log/*.log']
+        artifacts = ['**/data/selenium/prod/scratch/*.png',
+                     '**/data/selenium/prod/log/*.log',
+                     'aloe-prod.log',
+                     'aloe-selenium.log']
         testResults = ['**/data/selenium/prod/scratch/*.xml']
         dockerStage('Prod aloe tests', artifacts, testResults) {
             sh('./develop.sh aloe prod')
