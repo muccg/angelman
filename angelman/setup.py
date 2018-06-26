@@ -39,7 +39,7 @@ for package in ['angelman']:
 
 
 setup(name='django-angelman',
-      version="4.1.11",
+      version="4.1.12",
       packages=packages,
       description='RDRF',
       long_description='Rare Disease Registry Framework',
