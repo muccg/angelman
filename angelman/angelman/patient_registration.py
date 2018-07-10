@@ -9,13 +9,16 @@ from registry.patients.models import PatientAddress
 from registry.groups.models import WorkingGroup, CustomUser
 from django.conf import settings
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class AngelmanRegistration(BaseRegistration, object):
 
     def __init__(self, user, request):
         super(AngelmanRegistration, self).__init__(user, request)
 
-    def process(self,):
+    def process(self):
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
         preferred_language = self.request.POST.get("preferred_language", "en")
@@ -37,8 +40,8 @@ class AngelmanRegistration(BaseRegistration, object):
             sex=self.request.POST["gender"]
         )
 
-        patient.rdrf_registry.add(registry.id)
-        patient.working_groups.add(working_group.id)
+        patient.rdrf_registry.add(registry)
+        patient.working_groups.add(working_group)
         patient.home_phone = self.request.POST["phone_number"]
         patient.email = user.username
         patient.user = None
@@ -49,6 +52,7 @@ class AngelmanRegistration(BaseRegistration, object):
         address.save()
 
         parent_guardian = self._create_parent(self.request)
+        
         parent_guardian.patient.add(patient)
         parent_guardian.user = user
         parent_guardian.save()
