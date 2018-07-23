@@ -23,6 +23,7 @@ script:
 - chmod 755 ~/.docker
 - chmod 644 ~/.docker/config.json
 - export "GIT_BRANCH=$TRAVIS_BRANCH"
+- test -f docker-build.key && (mkdir -p ~/.ssh; cp docker-build.key ~/.ssh/id_rsa; cp docker-build.pub ~/.ssh/id_rsa.pub; chmod 600 ~/.ssh/id_rsa)
 - test x"$TRAVIS_PULL_REQUEST_BRANCH" != x"" && export "GIT_BRANCH=$TRAVIS_PULL_REQUEST_BRANCH" || echo "This build is not a PR."
 - export "BRANCH_NAME=$GIT_BRANCH"
 - ./travis-build.sh
