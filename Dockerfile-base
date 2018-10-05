@@ -2,7 +2,7 @@ FROM muccg/python-base:3.6-debian-8
 MAINTAINER https://github.com/muccg/
 
 ENV PROJECT_NAME angelman
-ENV PROJECT_SOURCE git@github.com:muccg/angelman.git
+ENV PROJECT_SOURCE https://github.com/muccg/angelman.git
 ENV DEPLOYMENT prod
 ENV PRODUCTION 1
 ENV DEBUG 0
