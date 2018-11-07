@@ -2,15 +2,19 @@
 {% load static %}
 {% load recaptcha_site_key %}
 {% load i18n %}
+{% load registry_version %}
 
 <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
         $('[data-toggle="tooltip"]').tooltip();
+
+        {% if not is_mobile %}
         $("#the-form").accordion({
             heightStyle: "content",
             collapsible: true
         });
+        {% endif %}
         $("#password-error").hide();
         $("#username-error").hide();
         $("#registration-submit").hide();
@@ -161,6 +165,18 @@
     <strong>{% trans "Parent/Guardians" %}</strong>:
     {% trans "You may register one patient at this stage - if you have multiple patients to register, you will be able to enter their details once you have logged into the registry. Please note you must be the patient's parent or guardian to register on their behalf." %}
 </div>
+
+{% if is_mobile %}
+<div class="alert alert-info">
+    {% registry_version 'angelman' %}
+    <small>
+        <p class="text-justify text-muted">
+            {% trans "Privacy Statement - All information we receive from you will be treated confidentially and will be encrypted and stored on a secure server. Only de-identified health information will be made accessible to qualified researchers who are granted permission by the Steering committee." %}
+        </p>
+    </small>
+</div>
+
+{% endif %}
 
 <div id="form-invalid" class="alert alert-danger">
     {% trans "Please fill out all required fields" %}

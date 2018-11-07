@@ -19,6 +19,14 @@
     <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js"></script>
     <script src='https://www.google.com/recaptcha/api.js'></script>
     <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+      {% if is_mobile %}
+      var mobile = true;
+      {% else %}
+      var mobile = false;
+      {% endif %}
+    </script>
 
     <style>
         body {
@@ -50,6 +58,7 @@
     
     <script type="text/javascript">
         $(document).ready(function() {
+	    console.log("mobile = " + mobile.toString());
             //$("#id_password1").passStrengthify();
             $("#registration-submit").prop("disabled", true);
             var state_lookup_url = "{% url 'v1:state_lookup' 'XX' %}";
@@ -58,6 +67,10 @@
             $("#patient_form").show();
             $("#form-other-clinician").hide();
             $("#underage_msg").hide();
+
+	    $("#parent_guardian_form").show();
+            $("#patient_form").show();
+
             
             var registry_code = "{{registry_code}}"
             
@@ -76,6 +89,7 @@
             $("#id_parent_guardian_date_of_birth").datepicker(dateOptions);
             
             $("#parent_guardian_check1").click(function() {
+	        console.log("pg check 1");
                 $("#parent_guardian_form").hide();
                 $("#patient_form").show();
                 $("#parent_guardian_form_btn").hide();
@@ -83,6 +97,7 @@
                 $("#id_self_patient").val(false);
             });
             $("#parent_guardian_check2").click(function() {
+	        console.log("pg check 2");
                 $("#parent_guardian_form").show();
                 $("#patient_form").hide();
                 $("#parent_guardian_form_btn").show();
@@ -91,6 +106,7 @@
                 $("#id_self_patient").val(false);
             });
             $("#parent_guardian_check3").click(function() {
+	        console.log("pg check 3");
                 $("#parent_guardian_form").show();
                 $("#patient_form").hide();
                 $("#parent_guardian_form_btn").show();
@@ -102,11 +118,11 @@
             $("#parent_guardian_check1").trigger("click");
             $("#patient_form_btn").click(function() {
                 $("#patient_form").show();
-                $("#parent_guardian_form").hide();
+                //$("#parent_guardian_form").hide();
             });
             
             $("#parent_guardian_form_btn").click(function() {
-                $("#patient_form").hide();
+                //$("#patient_form").hide();
                 $("#parent_guardian_form").show();
             });
             
@@ -201,6 +217,8 @@
         {% endwith %}
  
     </div>
+
+    {% if not is_mobile %}
     
     <nav class="navbar navbar-default navbar-fixed-bottom">
         <div class="container" style="padding-top: 10px;">
@@ -212,6 +230,8 @@
             </small>
         </div>
     </nav>
+    
+    {% endif %}
     
 </body>
 
