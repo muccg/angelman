@@ -31,6 +31,7 @@ class AngelmanRegistration(BaseRegistration, object):
 
         user.working_groups = [working_group,]
         user.save()
+        logger.debug("AngelmanRegistration process - created user")
 
         patient = Patient.objects.create(
             consent=True,
@@ -47,15 +48,18 @@ class AngelmanRegistration(BaseRegistration, object):
         patient.user = None
 
         patient.save()
+        logger.debug("AngelmanRegistration process - created patient")
 
         address = self._create_patient_address(patient, self.request)
         address.save()
+        logger.debug("AngelmanRegistration process - created patient address")
 
         parent_guardian = self._create_parent(self.request)
         
         parent_guardian.patient.add(patient)
         parent_guardian.user = user
         parent_guardian.save()
+        logger.debug("AngelmanRegistration process - created parent")
 
         template_data = {
             "patient": patient,
@@ -64,6 +68,7 @@ class AngelmanRegistration(BaseRegistration, object):
         }
 
         process_notification(registry_code, EventType.NEW_PATIENT, template_data)
+        logger.debug("AngelmanRegistration process - sent notification for NEW_PATIENT")
 
     def _create_parent(self, request):
         parent_guardian = ParentGuardian.objects.create(
