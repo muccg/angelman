@@ -26,6 +26,8 @@ class AngelmanRegistration(BaseRegistration, object):
                                                                            state="emailed")
             except ClinicianSignupRequest.DoesNotExist:
                 raise Exception("Clinician already signed up or unknown token")
+        else:
+            self.clinician_signup = None
 
 
     def _do_clinician_signup(self, registry_model):
@@ -39,7 +41,22 @@ class AngelmanRegistration(BaseRegistration, object):
 
         user.working_groups = [working_group]
         user.save()
+        self.clinician_signup.clinician_other.user = user
+        self.clinician_signup.clinician_other.save()
+        self.clinician_signup.state = "signed-up"   # at this stage the user is created but not active
+        self.clinician_signup.save()
+        activation_template_data = {
+            "clinician_email": self.clinician_signup.clinician_email,
+            "clinician_name": self.clinician_signup.clinician_other.clinician_name,
+            "registration": RegistrationProfile.objects.get(user=user)
+        }
         
+        process_notification(registry_model.code,
+                             EventType.CLINICIAN_ACTIVATION,
+                             activation_template_data)
+        logger.debug("AngelmanRegistration process - sent activation link for registered clinician")
+
+
 
     def process(self):
         registry_code = self.request.POST['registry_code']
