@@ -7,6 +7,7 @@ from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
 from registry.groups.models import WorkingGroup, CustomUser
+from rdrf.models.workflow_models import ClinicianSignupRequest
 from django.conf import settings
 
 import logging
@@ -16,12 +17,38 @@ logger = logging.getLogger(__name__)
 class AngelmanRegistration(BaseRegistration, object):
 
     def __init__(self, user, request):
-        super(AngelmanRegistration, self).__init__(user, request)
+        self.token = request.session.get("token", None)
+        self.user = user
+        self.request = request
+        if self.token:
+            try:
+                self.clinician_signup = ClinicianSignupRequest.objects.get(token=self.token,
+                                                                           state="emailed")
+            except ClinicianSignupRequest.DoesNotExist:
+                raise Exception("Clinician already signed up or unknown token")
+
+
+    def _do_clinician_signup(self, registry_model):
+        user = self._create_django_user(self.request,
+                                        self.user,
+                                        registry_model,
+                                        is_parent=False,
+                                        is_clinician=True)
+        working_group, status = WorkingGroup.objects.get_or_create(name=self._UNALLOCATED_GROUP,
+                                                                   registry=registry_model)
+
+        user.working_groups = [working_group]
+        user.save()
+        
 
     def process(self):
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
         preferred_language = self.request.POST.get("preferred_language", "en")
+        if self.clinician_signup:
+            logger.debug("signing up clinician")
+            self._do_clinician_signup(registry)
+            return
 
         user = self._create_django_user(self.request, self.user, registry, is_parent=True)
         user.preferred_language = preferred_language
