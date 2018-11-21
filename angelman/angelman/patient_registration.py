@@ -2,11 +2,10 @@ from registry.groups.patient_registration.base import BaseRegistration
 from rdrf.services.io.notifications.email_notification import process_notification
 from rdrf.events.events import EventType
 from registration.models import RegistrationProfile
-from registry.patients.models import AddressType
 from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
-from registry.groups.models import WorkingGroup, CustomUser
+from registry.groups.models import WorkingGroup
 from rdrf.models.workflow_models import ClinicianSignupRequest
 from django.conf import settings
 
@@ -36,15 +35,25 @@ class AngelmanRegistration(BaseRegistration, object):
                                         registry_model,
                                         is_parent=False,
                                         is_clinician=True)
-        working_group, status = WorkingGroup.objects.get_or_create(name=self._UNALLOCATED_GROUP,
-                                                                   registry=registry_model)
 
-        user.working_groups = [working_group]
+
+        logger.debug("created django user for clinician")
+
+        # working group should be the working group of the patient
+        patient = Patient.objects.get(id=self.clinician_signup.patient_id)
+
+        user.working_groups = [wg for wg in patient.working_groups.all()]
         user.save()
+        logger.debug("set clinician working groups to patient's")
         self.clinician_signup.clinician_other.user = user
+        self.clinician_signup.clinician_other.use_other = False
         self.clinician_signup.clinician_other.save()
         self.clinician_signup.state = "signed-up"   # at this stage the user is created but not active
         self.clinician_signup.save()
+        patient.clinician = user
+        patient.save()
+        logger.debug("made this clinician the clinician of the patient")
+        
         activation_template_data = {
             "clinician_email": self.clinician_signup.clinician_email,
             "clinician_name": self.clinician_signup.clinician_other.clinician_name,
@@ -73,7 +82,7 @@ class AngelmanRegistration(BaseRegistration, object):
         working_group, status = WorkingGroup.objects.get_or_create(name=self._UNALLOCATED_GROUP,
                                                                    registry=registry)
 
-        user.working_groups = [working_group,]
+        user.working_groups = [working_group]
         user.save()
         logger.debug("AngelmanRegistration process - created user")
 
