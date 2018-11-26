@@ -30,6 +30,7 @@ class AngelmanRegistration(BaseRegistration, object):
 
 
     def _do_clinician_signup(self, registry_model):
+        from rdrf.helpers.utils import get_site
         user = self._create_django_user(self.request,
                                         self.user,
                                         registry_model,
@@ -53,10 +54,13 @@ class AngelmanRegistration(BaseRegistration, object):
         patient.clinician = user
         patient.save()
         logger.debug("made this clinician the clinician of the patient")
+
+        site_url = get_site()
         
         activation_template_data = {
+            "site_url":  site_url,
             "clinician_email": self.clinician_signup.clinician_email,
-            "clinician_name": self.clinician_signup.clinician_other.clinician_name,
+            "clinician_lastname": self.clinician_signup.clinician_other.clinician_name,
             "registration": RegistrationProfile.objects.get(user=user)
         }
         
