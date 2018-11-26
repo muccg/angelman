@@ -1,3 +1,4 @@
 [submodule "rdrf"]
 	path = rdrf
-	url = ssh://git@github.com/muccg/rdrf.git
+    #url = ssh://git@github.com/muccg/rdrf.git
+	url = https://github.com/muccg/rdrf.git
