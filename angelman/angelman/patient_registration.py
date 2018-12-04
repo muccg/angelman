@@ -60,7 +60,7 @@ class AngelmanRegistration(BaseRegistration, object):
         activation_template_data = {
             "site_url":  site_url,
             "clinician_email": self.clinician_signup.clinician_email,
-            "clinician_lastname": self.clinician_signup.clinician_other.clinician_name,
+            "clinician_lastname": self.clinician_signup.clinician_other.clinician_last_name,
             "registration": RegistrationProfile.objects.get(user=user)
         }
         
