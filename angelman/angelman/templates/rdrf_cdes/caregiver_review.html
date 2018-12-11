@@ -1,0 +1,390 @@
+{% extends "rdrf_cdes/base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <br/>
+
+    {% if error_msg %}
+        <div class="alert alert-danger">{{error_msg}}</div>
+    {% endif %}
+
+
+
+
+          <p class="h1 center">12 Month Caregiver Check</p>
+
+          <p>
+            <p>
+
+
+
+    	     <div class="panel panel-default">
+                        <div class="panel-heading">
+                          <strong>Clinician Access</strong>
+    		                </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                              <div class="col-sm-3">
+                                <label style="display: block" class="control-label">
+                                  Permission given to <b><font color="red">{{clinician_name}}</font></b> to access your personal identified information.
+                                </label>
+                              </div>
+
+
+    			                    <div class="col-sm-6">
+                                <input class="form-control"  id="id_clinician_access" name="clinician_access" type="checkbox" />
+                              </div>
+                            </div>
+                        </div>
+            </div>
+
+            <hr/>
+              <div class="panel panel-default">
+                           <div class="panel-heading">
+                             <strong>Current Address</strong>
+                           </div>
+                           <div class="panel-body">
+                               <div class="form-group">
+                                 <div class="col-sm">
+                                   <label style="display: block" class="control-label">
+                                     Street Address
+                                   </label>
+                                 </div>
+
+                                 <div class="col-sm">
+                                   <input class="form-control"  id="id_address_street" name="address_street" type="textarea" />
+                                 </div>
+
+                                 <div class="col-sm">
+                                   <label style="display: block" class="control-label">
+                                     Suburb
+                                   </label>
+                                 </div>
+
+                                 <div class="col-sm">
+                                   <input class="form-control"  id="id_address_suburb" name="address_suburb" type="textarea" />
+                                 </div>
+
+
+                               <div class="col-sm">
+                                 <label style="display: block" class="control-label">
+                                   State
+                                 </label>
+                               </div>
+
+                               <div class="col-sm">
+                                 <select class="form-control"  id="id_address_state" name="address_suburb">
+                                 <option>Western Australia</option>
+                                 <option>New South Wales</option>
+                               </select>
+                               </div>
+
+                               <div class="col-sm">
+                                 <label style="display: block" class="control-label">
+                                   Postcode
+                                 </label>
+                               </div>
+
+                               <div class="col-sm">
+                                 <input class="form-control"  id="id_address_suburb" name="address_suburb" type="text" />
+                               </div>
+
+
+                             </div>
+                      </div>
+                    </div>
+
+
+
+
+          <hr/>
+
+
+          <div class="panel panel-default">
+                       <div class="panel-heading">
+                         <strong>Trials and Studies</strong>
+                       </div>
+                       <div class="panel-body">
+                           <div class="form-group">
+                             <div class="col-sm">
+                               <label style="display: block" class="control-label">
+                                 Existing Trials
+                               </label>
+                             </div>
+                             <ul>
+                            {% for trial in trials %}
+                              <li>
+                              <input id="fff" type="checkbox" value="NHSTX" />{{trial}}</label></li>
+                              </li>
+                            {% endfor %}
+                            </ul>
+
+                            <br/>
+
+                            <div class="col-sm">
+                              <label style="display: block" class="control-label">
+                                New Trials
+                              </label>
+                            </div>
+
+                            <div class="col-sm">
+                              <input class="form-control"  id="id_new_trials" name="new_trials" type="textarea" />
+                            </div>
+
+
+
+                           </div>
+
+
+                       </div>
+           </div>
+
+           <hr>
+             <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <strong>Current Weight</strong>
+                          </div>
+                          <div class="panel-body">
+                              <div class="form-group">
+                                <div class="col-sm">
+                                  <label style="display: block" class="control-label">
+                                    Weight (kg)
+                                  </label>
+                                </div>
+
+                                <div class="col-sm">
+                                  <input class="form-control"  id="id_weight" name="weight" type="number" />
+                                </div>
+
+
+                              </div>
+                          </div>
+              </div>
+
+
+              <hr>
+                <div class="panel panel-default">
+                             <div class="panel-heading">
+                               <strong>Illness and Medical</strong>
+                             </div>
+                             <div class="alert alert-info">Last time that you visited us you we asked you about illness/s and medical problems you have. Can you please the current status.</div>
+                             <div class="panel-body">
+                                 <div class="form-group">
+                                   <div class="col-sm">
+                                     <label style="display: block" class="control-label">
+                                       Medical Problems
+                                     </label>
+                                   </div>
+
+                                   <ul>
+                                  {% for problem in medical_problems %}
+                                    <li>
+                                    <input id="fff" type="checkbox" value="NHSTX" />{{problem}}</label></li>
+                                    </li>
+                                  {% endfor %}
+                                  </ul>
+
+                                  <br/>
+
+                                  <div class="col-sm">
+                                    <label style="display: block" class="control-label">
+                                      Since 28 September 2017 has Sally Bloggs had to attend hospital for any reason?
+
+                                    </label>
+                                  </div>
+
+                                  <div class="col-sm">
+                                    <select>
+                                      <option>Yes</option>
+                                      <option>No</option>
+                                      <option>Unsure</option>
+
+                                    </select>
+                                  </div>
+
+                                 </div>
+                             </div>
+                 </div>
+
+                 <hr/>
+
+                 <div class="panel panel-default">
+                              <div class="panel-heading">
+                                <strong>Siezures</strong>
+                              </div>
+                              <div class="panel-body">
+                                  <div class="form-group">
+
+                                    <div class="col-sm">
+                                      <label style="display: block" class="control-label">
+                                        You previously indicated that Sally Bloggs has not experienced seizures, has this changed?
+
+                                      </label>
+                                    </div>
+
+                                    <div class="col-sm">
+                                      <select>
+                                        <option>Yes</option>
+                                        <option>No</option>
+                                        <option>Unsure</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <br/>
+
+
+                                  <div class="col-sm">
+                                    <label style="display: block" class="control-label">
+                                      Please advise if any of the following have changed:
+
+
+                                    </label>
+                                  </div>
+
+                                  <div class="col-sm">
+                                    <div class="radio">
+                                        <label><input type="radio" name="optradio" checked>Generalised Seizures</label>
+                                      </div>
+                                    <div class="radio">
+                                      <label><input type="radio" name="optradio">Tonic-Clonic Seizures</label>
+                                    </div>
+                                    <div class="radio disabled">
+                                      <label><input type="radio" name="optradio">Febrile Seizures</label>
+                                    </div>
+                                  </div>
+                                </div>
+                                </div>
+
+<hr/>
+
+
+                                <div class="panel panel-default">
+                                             <div class="panel-heading">
+                                               <strong>Medications</strong>
+                                             </div>
+
+                                             <div class="panel-body">
+                                                 <div class="form-group">
+                                                   <div class="col-sm">
+                                                     <label style="display: block" class="control-label">
+                                                      Are the following medications still being used and with the same dosage?
+                                                     </label>
+                                                   </div>
+
+                                                  <table class="table">
+
+                                                    <tr>
+                                                      <th>Medication</th>
+                                                      <th>Dose</th>
+                                                      <th>Stopped?</th>
+                                                    </tr>
+
+
+                                                  {% for med in meds %}
+
+                                                  <tr><td>{{med}}</td><td><input type="number"/></td>
+                                                    <td><input type="checkbox"/></td>
+
+                                                  </tr>
+
+                                                  {% endfor %}
+                                                </table/>
+
+
+                                                  <br/>
+
+
+
+<div class="panel panel-default">
+             <div class="panel-heading">
+               <strong>Diagnostics</strong>
+             </div>
+
+             <div class="panel-body">
+                 <div class="form-group">
+                   <div class="col-sm">
+                     <label style="display: block" class="control-label">
+                       Have you had any diagnostics since you last visited the Angelman registry on 28 September 2018?
+
+
+                     </label>
+                   </div>
+
+                   <ul>
+
+                    <li>
+                    <input id="fff" type="checkbox" value="NHSTX" />EEG</label></li>
+                    </li>
+
+
+                    <li>
+                    <input id="fff" type="checkbox" value="NHSTX" />Blood Test</label></li>
+                    </li>
+
+                    <li>
+                    <input id="fff" type="checkbox" value="NHSTX" />MRI</label></li>
+                    </li>
+
+                    <li>
+                    <input id="fff" type="checkbox" value="NHSTX" />Cerebral spinal fluid</label></li>
+                    </li>
+
+                    <li>
+                    <input id="fff" type="checkbox" value="NHSTX" />Other</label></li>
+                    </li>
+
+                  </ul>
+
+                  <br/>
+
+
+
+
+                 </div>
+             </div>
+ </div>
+
+
+ <div class="panel panel-default">
+              <div class="panel-heading">
+                <strong>Feedback</strong>
+              </div>
+
+              <div class="panel-body">
+                  <div class="form-group">
+                    <div class="col-sm">
+                      <label style="display: block" class="control-label">
+                      If you have any feedback , please let us know
+
+
+
+
+                      
+
+                      </label>
+                    </div>
+
+
+
+                    <div class="col-sm">
+                      <textarea class="form-control"  id="id_address_street" name="address_street" type="textarea"></textarea>
+                    </div>
+
+
+                   <br/>
+
+
+
+
+
+                  </div>
+              </div>
+  </div>
+
+  <br>
+
+  <button type="submit">Submit Review</button>
+
+
+
+{% endblock %}

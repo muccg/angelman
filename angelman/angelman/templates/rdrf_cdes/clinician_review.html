@@ -1,0 +1,196 @@
+{% extends "rdrf_cdes/base.html" %}
+{% load i18n %}
+{% load de_camelcase %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {% if age >= 18 %}
+        <script>
+            $(document).ready(function() {
+                $('#form-other-clinician').hide();
+                $('#clinician-msg').hide();
+                $('#to-parent-warning').hide();
+                $('#to-parent-btn').click(function() {
+                    $('#to-parent-warning').show("fast");
+                });
+                $('#to-parent-no').click(function() {
+                    $('#to-parent-warning').hide("fast");
+                });
+                
+                $('[data-toggle=popover]').popover({
+                    "trigger": "hover",
+                    "html": true
+                });
+                
+                $.get("{% url 'v1:clinician-list' registry_code %}", function(data) {
+                    clinician_drop = $("#id_clinician");
+                    $.each(data, function(i, item){
+                        clinician_drop.append($('<option>', { value : item.id }).text(item.full_name)); 
+                    });
+//                    clinician_drop.append($('<option>', { value : 'clinician-other' }).text('Other - not listed'));
+                }).done(function() {
+                    clinician_drop.val('{{clinician_selection}}');
+                });
+                
+                $('#id_clinician').change(function() {
+                    if ($(this).val() != -1) {
+                        var url = "{% url 'v1:patient-detail' registry_code patient.id %}";
+                        var urls = $(this).val().split("_");
+                        $.ajax({
+                            type: "PATCH",
+                            url: url,
+                            data: {
+                                'clinician': urls[0],
+                                'working_groups': urls[1],
+                                'user.working_groups' : urls[1],
+                            },
+                            beforeSend: function (request) {
+                                request.setRequestHeader("X-CSRFToken", '{{csrf_token}}');
+                            }
+                        }).done(function() {
+                            $('#clinician-msg').text('Your selection has been saved successfully');
+                            $('#clinician-msg').show('slow', function () {
+                                setTimeout(function() {
+                                    $('#clinician-msg').hide('slow')
+                                }, 1000);
+                            });
+                        }).fail(function() {
+                            console.log("error");
+                        });
+//                    } if($('#id_clinician option:selected').val() == 'clinician-other') {
+//                        $("#form-other-clinician").show("blind");
+//                    } else {
+//                        $("#form-other-clinician").hide("blind");
+                    }
+                });
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <br/>
+    
+    {% if splash_screen %}
+        <div class="well">
+            {% autoescape off %}
+                {{ splash_screen }}
+            {% endautoescape %}
+        </div>
+    {% endif %}
+    
+    {% if error_msg %}
+        <div class="alert alert-danger">{{error_msg}}</div>
+    {% endif %}
+
+
+    {% if request.user.is_authenticated %}
+
+        {% if request.user.is_patient %}
+            <div class="alert alert-success" id="clinician-msg"></div>
+        
+            <div class="alert alert-info">Welcome {{request.user.first_name}}</div>
+            
+            {% if not access %}
+                <div class="alert alert-danger">{% trans "You don't have access to this registry" %}</div>
+            {% endif %}
+
+            <div class="alert alert-warning">
+                <small>
+                    <i>
+                        Your Doctor<br> There are several questionnaires in this registry: some that you fill in yourself and one that your
+                        doctor fills out for you. To achieve this your doctor will access your data with his own user account. Please select
+                        your doctor below. If your doctor is not listed below, please choose ‘other’ and provide their details.
+                    </i>
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <select class="form-control" id="id_clinician" name="clinician"
+                    data-toggle="tooltip"
+                    title="Choose your doctor/ clinician/ physician">
+                    <option value="-1">Choose your preferred Doctor</option>
+                </select>
+            </div>
+
+            <div id="form-other-clinician">
+                <div class="form-group">
+                    <input class="form-control" placeholder="Clinician's Name" id="id_other_clinician_name" name="other_clinician_name" type="text" />
+                </div>
+                <div class="form-group">
+                    <input class="form-control" placeholder="Clinician's Hospital" id="id_other_clinician_hospital" name="other_clinician_hospital" type="text" />
+                </div>
+                <div class="form-group bottom-separator">
+                    <input class="form-control" placeholder="Clinician's or Hospital's Address" id="id_other_clinician_address" name="other_clinician_address" type="text" />
+                </div>
+            </div>
+
+            <p>
+                <a href="{% url 'patient_edit' registry_code patient_id %}"
+                    class="btn btn-warning"
+                    data-toggle="popover"
+                    data-content="Here you can access your personal and contact details."
+                    data-placement="right">
+                    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> {% trans 'Edit your details' %}
+                </a>
+                {% if age >= 18 %}
+                    <button id="to-parent-btn"
+                        class="btn btn-info"
+                        data-toggle="popover"
+                        data-content="If you have FKRP-related condition and you have a child with the FKRP-related condition you can convert your account to a parent one and add your child to the registry here."
+                        data-placement="right">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span> {% trans 'I am a parent' %}
+                    </button>
+                    <div id="to-parent-warning" class="alert alert-danger">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        {% trans 'You are about to convert your patient account in to a parent one. <strong>Are you sure?</strong> '%}
+                        <p class="pull-right">
+                            <a href="{% url 'patient_to_parent' registry_code patient_id %}" class="btn btn-success"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> {% trans 'Yes' %}</a>
+                            <button id="to-parent-no" class="btn btn-danger"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> {% trans 'No' %}</button>
+                            <div class="clearfix"></div>
+                        </p>
+                    </div>
+                {% endif %}
+            </p>
+
+            {% if consent %}
+                <ul class="list-group">
+                    <a href="{% url 'consent_form_view' registry_code patient_id %}"
+                        data-toggle="popover"
+                        data-content="<span style='color: green' class='glyphicon glyphicon-ok' aria-hidden='true'></span> Consents"
+                        data-placement="bottom"
+                        class="list-group-item">Consents
+                    </a>
+                {% for form in forms %}
+                    <a href="{{ form.link }}"
+                        data-toggle="popover"
+                        data-content="{{form.form.header|safe}}"
+                        data-placement="bottom" class="list-group-item">
+                            {{form.name|de_camelcase}}
+                            {% if form.progress == 100 %}
+                                <span class="label label-success">{{form.progress}} %</span>
+                            {% elif form.progress < 100 and form.progress > 0 %}
+                                <span class="label label-warning">{{form.progress}} %</span>
+                            {% elif form.progress == 0 %}
+                                <span class="label label-danger">{{form.progress}} %</span>
+                            {% endif %}
+                            {% if form.readonly %}<i><font style="color: red">Readonly</font></strong></i>{% endif %}
+                    </a>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <div class="alert alert-danger">
+                    Please sign the consent <a href="{% url 'consent_form_view' registry_code patient_id %}">here</a> to see avilable forms
+                </div>
+            {% endif %}
+        {% elif request.user.is_superuser %}
+            <div class="alert alert-warning">Place for admins is <a href="{% url 'admin:index' %}">here</a></div>
+        {% else %}
+            <div class="alert alert-danger">{% trans 'Looks like you are not a patient. Please contact administrator!' %}</div>
+        {% endif %}
+        
+    {% else %}
+        <div class="alert alert-info">{% trans 'Please log in to access the registry.' %}</div>
+    {% endif %}
+
+{% endblock %}
