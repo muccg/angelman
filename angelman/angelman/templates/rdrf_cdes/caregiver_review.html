@@ -7,17 +7,10 @@
     {% if error_msg %}
         <div class="alert alert-danger">{{error_msg}}</div>
     {% endif %}
-
-
-
-
           <p class="h1 center">12 Month Caregiver Check</p>
-
           <p>
-            <p>
-
-
-
+          <p>
+	    {% if clinician_name %}
     	     <div class="panel panel-default">
                         <div class="panel-heading">
                           <strong>Clinician Access</strong>
@@ -29,14 +22,14 @@
                                   Permission given to <b><font color="red">{{clinician_name}}</font></b> to access your personal identified information.
                                 </label>
                               </div>
-
-
-    			                    <div class="col-sm-6">
-                                <input class="form-control"  id="id_clinician_access" name="clinician_access" type="checkbox" />
+    			      <div class="col-sm-6">
+                                <input class="form-control"  id="id_clinician_access" name="clinician_access" type="checkbox" {{clinician_consent }} />
                               </div>
                             </div>
                         </div>
             </div>
+
+	    {% endif %}
 
             <hr/>
               <div class="panel panel-default">
@@ -52,7 +45,7 @@
                                  </div>
 
                                  <div class="col-sm">
-                                   <input class="form-control"  id="id_address_street" name="address_street" type="textarea" />
+                                   <input class="form-control"  id="id_address_street" name="address_street" type="textarea" value="{{r.street}}" />
                                  </div>
 
                                  <div class="col-sm">
@@ -62,7 +55,7 @@
                                  </div>
 
                                  <div class="col-sm">
-                                   <input class="form-control"  id="id_address_suburb" name="address_suburb" type="textarea" />
+                                   <input class="form-control"  id="id_address_suburb" name="address_suburb" type="textarea" value="{{r.suburb}}" />
                                  </div>
 
 
@@ -73,9 +66,10 @@
                                </div>
 
                                <div class="col-sm">
-                                 <select class="form-control"  id="id_address_state" name="address_suburb">
-                                 <option>Western Australia</option>
-                                 <option>New South Wales</option>
+                                 <select class="form-control"  id="id_address_state" name="address_state">
+				 {% for state in states %}
+                                 <option value="{{state.value}}" {% if state.value == r.state %}selected{% endif %}>{{state.name}}</option>
+				 {% endfor %}
                                </select>
                                </div>
 
@@ -86,7 +80,7 @@
                                </div>
 
                                <div class="col-sm">
-                                 <input class="form-control"  id="id_address_suburb" name="address_suburb" type="text" />
+                                 <input class="form-control"  id="id_address_postcode" name="address_postcode" type="text" value="{{r.postcode}}" />
                                </div>
 
 
