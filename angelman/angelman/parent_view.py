@@ -108,7 +108,7 @@ class ParentView(BaseParentView):
 
     def get(self, request, registry_code, context_id=None):
         context = {}
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             parent = ParentGuardian.objects.get(user=request.user)
             registry = Registry.objects.get(code=registry_code)
 
