@@ -2,7 +2,7 @@ import logging
 
 from django.views.generic.base import View
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
@@ -108,7 +108,7 @@ class ParentView(BaseParentView):
 
     def get(self, request, registry_code, context_id=None):
         context = {}
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             parent = ParentGuardian.objects.get(user=request.user)
             registry = Registry.objects.get(code=registry_code)
 

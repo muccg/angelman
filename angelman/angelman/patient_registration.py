@@ -43,7 +43,7 @@ class AngelmanRegistration(BaseRegistration, object):
         # working group should be the working group of the patient
         patient = Patient.objects.get(id=self.clinician_signup.patient_id)
 
-        user.working_groups = [wg for wg in patient.working_groups.all()]
+        user.working_groups.set([wg for wg in patient.working_groups.all()])
         user.save()
         logger.debug("set clinician working groups to patient's")
         self.clinician_signup.clinician_other.user = user
@@ -86,7 +86,7 @@ class AngelmanRegistration(BaseRegistration, object):
         working_group, status = WorkingGroup.objects.get_or_create(name=self._UNALLOCATED_GROUP,
                                                                    registry=registry)
 
-        user.working_groups = [working_group]
+        user.working_groups.set([working_group])
         user.save()
         logger.debug("AngelmanRegistration process - created user")
 
