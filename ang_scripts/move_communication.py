@@ -1,13 +1,14 @@
+import django
+django.setup()
 from registry.patients.models import Patient
 from rdrf.models.definition.models import ClinicalData
 from rdrf.models.definition.models import Registry
 import sys
 import json
+import traceback
 from datetime import datetime
 from copy import deepcopy
 from django.db import transaction
-import django
-django.setup()
 
 
 OLD_FORM = "AngelmanRegistryBehaviourAndDevelopment"
@@ -17,6 +18,18 @@ SPEECH_SECTION = "ANGBEHDEVSPEECHLANGUAGE"
 COMM_SECTION = "ANGBEHDEVCOMMUNICATION"
 SECTIONS = [SPEECH_SECTION, COMM_SECTION]
 
+class Stats:
+    errors = 0
+    ids_processed = []
+    ids_skipped = []
+
+
+class NoData(Exception):
+    pass
+
+
+    
+
 
 class Logger:
     def __init__(self, patient):
@@ -25,7 +38,8 @@ class Logger:
 
     def log(self, msg, msg_type="INFO"):
         prefix = self.prefix()
-        print("%s %s %s" % (prefix, msg_type, msg))
+        s = "%s %s %s" % (prefix, msg_type, msg)
+        print(s)
 
     def error(self, msg):
         self.log(msg, "ERROR")
@@ -81,10 +95,11 @@ class Munger:
 
     def _load_data(self):
         self.data = self.patient.get_dynamic_data(self.registry)
-        self.context_id = self.data["context_id"]
+        if self.data is not None and "context_id" in self.data:
+            self.context_id = self.data["context_id"]
 
     def backup(self, data):
-        filename = "patient_%s.json" % self.patient.id
+        filename = "comms_update_patient_%s.json" % self.patient.id
         with open(filename, "w") as f:
             json.dump(data, f)
 
@@ -101,18 +116,23 @@ class Munger:
 
     def munge(self):
         self.log("starting to munge ...")
-        self._print_data("data before munging:")
+        if self.context_id is None:
+            self.logger.warn("No context id? - skipping")
+            Stats.ids_skipped.append(self.patient_id)
         if not self.data:
             self.logger.warn("no data - skipping")
+            Stats.ids_skipped.append(self.patient_id)
             return
 
         if "forms" not in self.data:
             self.log("no forms key in data - skipping")
+            Stats.ids_skipped.append(self.patient_id)
             return
 
         old_form = get_form(self.data, OLD_FORM)
         if not old_form:
             self.log("no %s form - skipping" % OLD_FORM)
+            Stats.ids_skipped.append(self.patient_id)
             return
 
         backup_data = deepcopy(self.data)
@@ -122,8 +142,8 @@ class Munger:
         self._move_data(self.data, old_form, COMM_SECTION)
         self._delete_old_sections(old_form)
 
-        self._print_data("data after  munging:")
         self.save()
+        Stats.ids_processed.append(self.patient_id)
 
     def save(self):
         if not self.dry_run:
@@ -139,7 +159,6 @@ class Munger:
         self.log("saved new data ok")
 
     def _get_clinical_data_model(self):
-        collection = "cdes"
         return ClinicalData.objects.get(collection="cdes",
                                         registry_code=self.registry_code,
                                         django_model="Patient",
@@ -175,42 +194,62 @@ class Munger:
 
 
 def check_registry(reg):
-    form_names = [f.name for f in ang.forms]
+    form_names = [f.name for f in reg.forms]
     if NEW_FORM not in form_names:
-        raise Exception("registry not correct")
+        raise Exception("%s form not present" % NEW_FORM)
     if OLD_FORM not in form_names:
-        raise Exception("registry not correct")
+        raise Exception("%s form not present" % OLD_FORM)
 
-    section_codes = [s["code"] for f in reg.forms for s in f.section_models]
+    section_codes = [s.code for f in reg.forms for s in f.section_models]
+    print("section_codes = %s" % section_codes)
     if SPEECH_SECTION not in section_codes:
-        raise Exception("registry not correct")
+        raise Exception("speech section %s not present" % SPEECH_SECTION)
+
+    if COMM_SECTION not in section_codes:
+        raise Exception("comm section %s not present" % COMM_SECTION)
+        
 
 
 def run(dry_run=True):
+    if dry_run:
+        print("this is a dry run - no data will be changed")
+    else:
+        print("this is NOT a dry run - data will be updated")
     ang = Registry.objects.get(code="ang")
     check_registry(ang)
-    backups = []
+    print("checked registry - seems ok")
 
     for p in Patient.objects.all():
-        m = Munger(ang, p)
+        try:
+            m = Munger(ang, p)
+        except NoData:
+            print("could not load data for patient %s - skipping" % p.id) 
+            Stats.ids_skipped.append(p.id)
         m.dry_run = dry_run
         m.munge()
 
 
 if __name__ == '__main__':
-    dry_run = False
+    dry_run = True
     try:
         dry_run = sys.argv[1] != "real"
     except:
         pass
 
     if not dry_run:
-        answer = input("NOT a dry run - Are you sure?")
-        if answer not in ["Y", "y", "yes"]:
+        answer = input("NOT a dry run - Are you sure? (yes/y/no/n): ")
+        if answer.lower() not in ["y", "yes"]:
             sys.exit(0)
 
     try:
         with transaction.atomic():
             run(dry_run)
+
+        total_skipped = len(Stats.ids_skipped)
+        total_processed = len(Stats.ids_processed)
+        print("stats total processed = %s" % total_processed)
+        print("stats total skipped = %s" % total_skipped)
+        
     except Exception as ex:
         print("run failed ! ( rolled back): %s" % ex)
+        print("Traceback:\n %s" %traceback.format_exc())
