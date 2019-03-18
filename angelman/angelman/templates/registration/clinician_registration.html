@@ -1,0 +1,384 @@
+{% load countries %}
+{% load static %}
+{% load i18n %}
+{% load registry_version %}
+{% load recaptcha_site_key %}
+<html>
+
+<head>
+    <title>RDRF | Clinician registration</title>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
+
+    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="//code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js"></script>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+      {% if is_mobile %}
+      var mobile = true;
+      {% else %}
+      var mobile = false;
+      {% endif %}
+    </script>
+
+    <style>
+        body {
+            background-color: #edeff1;
+            padding-bottom: 70px;
+        }
+        .top-separator {
+            border-top: dotted 1px #bbb;
+            padding-top: 20px;
+        }
+        .bottom-separator {
+            border-bottom: dotted 1px #bbb;
+            padding-bottom: 20px;
+        }
+        
+        .error {
+            color: red;
+            font-style: italic;
+            font-size: small;
+        }
+        .version {
+            position: absolute;
+            bottom: 3px;
+            left: 3px;
+            font-size: xx-small;
+            color: gray;
+        }
+    </style>
+    
+    <script type="text/javascript">
+        $(document).ready(function() {
+	        $("#registration-submit").prop("disabled", true);
+            var state_lookup_url = "{% url 'v1:state_lookup' 'XX' %}";
+            var _MS_PER_DAY = 1000 * 60 * 60 * 24 * 365;
+            var state_lookup_url = "{% url 'v1:state_lookup' 'XX' %}";     
+            var registry_code = "{{registry_code}}"
+            
+            var dateOptions = {
+                'dateFormat': 'yy-mm-dd',
+                'showAnim': 'blind',
+                'changeMonth': true,
+                'changeYear': true,
+                'minDate': '-100Y',
+                'maxDate': '0',
+                'yearRange': '-100:+0',
+                'defaultDate': '-30Y'
+            }
+            
+            $("#id_clinician_date_of_birth").datepicker(dateOptions);
+                 
+            $("#registration-submit").click(function() {
+                var registration_form = $("#registration-form");
+                $("#id_email").val($("#id_username").val());
+                if (registration_form.valid()) {
+                    registration_form.submit();
+                } else {
+                    var msg = $("#form-invalid");
+                    msg.slideDown("slow", function() {
+                        setTimeout(function() {
+                            msg.slideUp("slow")
+                            }, 2000);
+                    });
+                }
+            });
+            
+            $("#id_clinician_country").change(function() {
+                var states = $("#id_clinician_state");
+                states.empty();
+                states.append($('<option>', { value : -1 }).text("State / County / Province / Region"));
+                $.getJSON( state_lookup_url.replace('XX', this.value), function( data ) {
+                    $.each( data, function( key, val ) {
+                        states.append($('<option>', { value : val.code }).text(val.name));
+                    });
+                });
+            });
+           
+        });    
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <br>
+    
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field in form %}
+                {% if field.errors %}
+                    <p><strong>{{field.label}}</strong> - {{ field.errors|striptags }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field in form %}
+                {% if field.errors %}
+                    <p><strong>{{field.label}}</strong> - {{ field.errors|striptags }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <h3>
+            <strong>{% trans "Angelman Registry - Clinician Registration" %}</strong>
+        </h3>
+        
+        <!-- clinician form goes here -->
+        
+<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#password-error").hide();
+        $("#username-error").hide();
+        $("#registration-submit").hide();
+        $("#form-invalid").hide();
+        
+        $("#id_password2").on("keyup", function() {
+            var password1 = $("#id_password1").val();
+            if (password1 != $(this).val()) {
+                $("#password-error").text(gettext("The passwords don't match!"));
+                $("#password-error").show("fast");
+                $("#registration-submit").hide();
+            } else {
+                $("#password-error").hide("fast");
+                password_regx = /^(?=.*[0-9])\S{6,}$/
+                if(!$(this).val().match(password_regx)) {
+                    $("#password-error").text(gettext("Password needs to be at least 6 characters long and contain 1 number"));
+                    $("#password-error").show("fast");
+                    $("#registration-submit").hide();
+                } else {
+                    $("#password-error").hide("fast");
+                    $("#registration-submit").show();
+                }
+            }
+        });
+        
+        $("#id_username").focusout(function() {
+            var url = "{% url 'lookup_username' 'replace-me@domain.com' %}";
+            url = url.replace("replace-me@domain.com", $(this).val());
+            
+            $.getJSON(url, function(data) {
+                if (data.existing == true) {
+                    $("#username-error").show("fast");
+                    $("#registration-submit").hide();
+                } else {
+                    $("#username-error").hide("fast");
+                    $("#registration-submit").show();
+                }
+            });
+        });
+        
+        $.validator.addMethod(
+            "dateFormat",
+            function(value, element) {
+                return value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            },
+            gettext("Please enter a date in the format yyyy-mm-dd")
+        );
+
+
+        $.validator.addMethod("validdate", function (value) {
+            var m = value.match(/\s*(\d{4})-(\d{1,2})-(\d{1,2})\s*/);
+            if (m == null) {
+                return false;
+            }
+            var year = parseInt(m[1]);
+            var month = parseInt(m[2]);
+            var day = parseInt(m[3]);
+
+            function isLeapYear(year) {
+                return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+            }
+
+            function daysInMonth(year, month) {
+                if (month === 2 && isLeapYear(year)) {
+                    return 29;
+                }
+                return [31,28,31,30,31,30,31,31,30,31,30,31][month - 1];
+            }
+
+            return year >= 1900 && month >= 1 && month <= 12 && day >=1 && day <= daysInMonth(year, month);
+        }, gettext("Please enter a valid date"));
+    
+        $.validator.addMethod(
+            "dateCorrect",
+            function(value, element) {
+                return Date.parse(value);
+            },
+            gettext("Date is not correct")
+        );
+        
+        $('#registration-form')
+            .validate({
+                ignore: ":disabled",
+                rules : {
+                    clinician_date_of_birth : {
+                        dateFormat : true,
+			            dateCorrect : true,
+			            validdate: true
+										  
+                    },
+                    clinician_phone : {
+                        maxlength: 20
+                    },
+                    clinician_phone_number: {
+                        maxlength: 30
+                    },
+                    clinician_country: {
+                        selectcheck: true
+                    },
+                    clinician_state: {
+                        selectcheck: true
+                    }
+                }
+            });
+
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            return (value != '0');
+        }, gettext("This field is required."));
+    });
+</script>
+
+<div class="alert alert-danger" id="username-error">
+    <p>
+        <b>{% trans "Username error:  This username already exists, please choose a different username." %}</b>
+    </p>
+    <p>
+        {% trans "If you have already registered with Angelman Registry and would like to update your data or add another patient, you don't have to register again. Just go to the login page and login with the e-mail address and password you previously registered with." %}
+    </p>    
+    <p>
+        {% trans "If you have forgotten your password, please  click on 'forgotten your password?'" %}
+    </p>
+</div>
+
+
+<div class="alert alert-info">
+    <small>
+        <p class="text-justify text-muted">
+            {% trans "Privacy Statement - All information we receive from you will be treated confidentially and will be encrypted and stored on a secure server. Only de-identified health information will be made accessible to qualified researchers who are granted permission by the Steering committee." %}
+        </p>
+    </small>
+</div>
+
+<div id="form-invalid" class="alert alert-danger">
+    {% trans "Please fill out all required fields" %}
+</div>
+
+<form class="" id="registration-form" method="POST">
+    {% csrf_token %}
+    <div class="row">
+
+        <div class="col-md-6">
+            <div id="login_details">
+                <div class="form-group">
+                    <div class="alert alert-info">
+                        {% trans "With your e-mail address and the password you choose here, you can login at any time to view or edit your data. In order to protect your personal data against unauthorised access, please choose a password which is hard to guess and write it down in a safe place. Note that the password is case-sensitive. Your password must be at least 6 characters long and contain a number." %}
+                    </div>
+                </div>
+    
+                <div class="form-group">
+                    <h5><div class="label label-warning">{% trans "Please provide valid email address as your username" %}</div></h5>
+                    <input class="form-control" placeholder="{% trans 'Username' %}" id="id_username" maxlength="50" name="username" type="email" value="{{username}}" required />
+                </div>
+                <div class="form-group">
+                    <input class="form-control" placeholder="{% trans 'Password' %}" id="id_password1" name="password1" type="password" required />
+                </div>
+                <div class="form-group">
+                    <input class="form-control" placeholder="{% trans 'Repeat Password' %}" id="id_password2" name="password2" type="password" required />
+                </div>
+    
+                <div class="form-group">
+                    <div class="alert alert-danger" id="password-error">
+                    </div>
+                </div>
+		{% if preferred_languages %}
+                <div class="form-group">
+                    <select class="form-control" name="preferred_language" id="id_preferred_language" required>
+                        <option value=0>{% trans "Preferred language for communication" %}</option>
+		        {% for preferred_language in preferred_languages %}
+                            <option value="{{ preferred_language.code }}">{% trans preferred_language.name %}</option>
+			{% endfor %}
+                    </select>
+                </div>
+		{% endif %}
+            </div>
+        </div>
+
+            <div class="col-md-6">
+            <input type="hidden" name="registry_code" value="{{registry_code}}">
+            <input id="id_email" name="email" type="hidden" />
+
+            <div id="the-form">
+                <h2>{% trans "Clinician Details" %}</h2>
+                <div id="clinician_form">
+                    <div class="form-group">
+                        <input class="form-control" placeholder="{% trans 'Clinician Given Names' %}" id="id_clinician_first_name" maxlength="30" name="clinician_first_name" type="text" value="{{first_name}}" required />
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" placeholder="{% trans 'Clinician Surname' %}" id="id_clinician_last_name" maxlength="30" name="clinician_last_name" value="{{last_name}}" type="text" required />
+                    </div>
+                   
+                    
+                   
+                    
+                   
+                    
+                </div>
+
+               
+            </div>
+
+            <br>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="g-recaptcha" data-sitekey="{% recaptcha_site_key %}"  data-callback='reCaptchaCallback'></div>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" id="registration-submit" class="btn btn-success pull-right">Submit</button>
+                </div>
+            </div>
+
+        </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    function reCaptchaCallback() {
+        r = grecaptcha.getResponse();
+        url = "{% url 'recaptcha_validator'%}";
+        $.post(url, {"response_value": r, "csrfmiddlewaretoken" : "{{csrf_token}}"}, function(data){
+            json_result = $.parseJSON(data);
+            if(json_result.success) {
+                $("#registration-submit").prop("disabled", false);
+            }
+        });
+    }
+</script>
+        
+        
+        <!-- end of clinician form -->
+        
+        
+        
+        
+       
+    </div>
+
+</body>
+
+</html>

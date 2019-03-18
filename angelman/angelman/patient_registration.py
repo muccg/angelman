@@ -2,11 +2,11 @@ from registry.groups.patient_registration.base import BaseRegistration
 from rdrf.services.io.notifications.email_notification import process_notification
 from rdrf.events.events import EventType
 from registration.models import RegistrationProfile
-from registry.patients.models import AddressType
 from registry.patients.models import ParentGuardian
 from registry.patients.models import Patient
 from registry.patients.models import PatientAddress
-from registry.groups.models import WorkingGroup, CustomUser
+from registry.groups.models import WorkingGroup
+from rdrf.models.workflow_models import ClinicianSignupRequest
 from django.conf import settings
 
 import logging
@@ -16,12 +16,69 @@ logger = logging.getLogger(__name__)
 class AngelmanRegistration(BaseRegistration, object):
 
     def __init__(self, user, request):
-        super(AngelmanRegistration, self).__init__(user, request)
+        self.token = request.session.get("token", None)
+        self.user = user
+        self.request = request
+        if self.token:
+            try:
+                self.clinician_signup = ClinicianSignupRequest.objects.get(token=self.token,
+                                                                           state="emailed")
+            except ClinicianSignupRequest.DoesNotExist:
+                raise Exception("Clinician already signed up or unknown token")
+        else:
+            self.clinician_signup = None
+
+
+    def _do_clinician_signup(self, registry_model):
+        from rdrf.helpers.utils import get_site
+        user = self._create_django_user(self.request,
+                                        self.user,
+                                        registry_model,
+                                        is_parent=False,
+                                        is_clinician=True)
+
+
+        logger.debug("created django user for clinician")
+
+        # working group should be the working group of the patient
+        patient = Patient.objects.get(id=self.clinician_signup.patient_id)
+
+        user.working_groups.set([wg for wg in patient.working_groups.all()])
+        user.save()
+        logger.debug("set clinician working groups to patient's")
+        self.clinician_signup.clinician_other.user = user
+        self.clinician_signup.clinician_other.use_other = False
+        self.clinician_signup.clinician_other.save()
+        self.clinician_signup.state = "signed-up"   # at this stage the user is created but not active
+        self.clinician_signup.save()
+        patient.clinician = user
+        patient.save()
+        logger.debug("made this clinician the clinician of the patient")
+
+        site_url = get_site()
+        
+        activation_template_data = {
+            "site_url":  site_url,
+            "clinician_email": self.clinician_signup.clinician_email,
+            "clinician_lastname": self.clinician_signup.clinician_other.clinician_last_name,
+            "registration": RegistrationProfile.objects.get(user=user)
+        }
+        
+        process_notification(registry_model.code,
+                             EventType.CLINICIAN_ACTIVATION,
+                             activation_template_data)
+        logger.debug("AngelmanRegistration process - sent activation link for registered clinician")
+
+
 
     def process(self):
         registry_code = self.request.POST['registry_code']
         registry = self._get_registry_object(registry_code)
         preferred_language = self.request.POST.get("preferred_language", "en")
+        if self.clinician_signup:
+            logger.debug("signing up clinician")
+            self._do_clinician_signup(registry)
+            return
 
         user = self._create_django_user(self.request, self.user, registry, is_parent=True)
         user.preferred_language = preferred_language
@@ -29,8 +86,9 @@ class AngelmanRegistration(BaseRegistration, object):
         working_group, status = WorkingGroup.objects.get_or_create(name=self._UNALLOCATED_GROUP,
                                                                    registry=registry)
 
-        user.working_groups = [working_group,]
+        user.working_groups.set([working_group])
         user.save()
+        logger.debug("AngelmanRegistration process - created user")
 
         patient = Patient.objects.create(
             consent=True,
@@ -47,15 +105,18 @@ class AngelmanRegistration(BaseRegistration, object):
         patient.user = None
 
         patient.save()
+        logger.debug("AngelmanRegistration process - created patient")
 
         address = self._create_patient_address(patient, self.request)
         address.save()
+        logger.debug("AngelmanRegistration process - created patient address")
 
         parent_guardian = self._create_parent(self.request)
         
         parent_guardian.patient.add(patient)
         parent_guardian.user = user
         parent_guardian.save()
+        logger.debug("AngelmanRegistration process - created parent")
 
         template_data = {
             "patient": patient,
@@ -64,6 +125,7 @@ class AngelmanRegistration(BaseRegistration, object):
         }
 
         process_notification(registry_code, EventType.NEW_PATIENT, template_data)
+        logger.debug("AngelmanRegistration process - sent notification for NEW_PATIENT")
 
     def _create_parent(self, request):
         parent_guardian = ParentGuardian.objects.create(

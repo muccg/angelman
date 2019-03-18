@@ -29,6 +29,9 @@ PROJECT_TITLE_LINK = "login_router"
 
 
 
+# Registration
+REGISTRATION_CLASS = "angelman.patient_registration.AngelmanRegistration"
+
 
 # For now keep MTM password validation same as on front end
 # at least 6 chars
