@@ -94,7 +94,10 @@ class Munger:
         self.logger.log(msg)
 
     def _load_data(self):
-        self.data = self.patient.get_dynamic_data(self.registry)
+        try:
+            self.data = self.patient.get_dynamic_data(self.registry)
+        except Exception as ex:
+            raise NoData(ex)
         if self.data is not None and "context_id" in self.data:
             self.context_id = self.data["context_id"]
 
@@ -222,8 +225,9 @@ def run(dry_run=True):
     for p in Patient.objects.all():
         try:
             m = Munger(ang, p)
-        except NoData:
-            print("could not load data for patient %s - skipping" % p.id) 
+        except NoData as nd:
+            print("NoData error: %s" % nd)
+            print("could not load data for patient %s - skipping" % p.id)
             Stats.ids_skipped.append(p.id)
         m.dry_run = dry_run
         m.munge()
