@@ -46,7 +46,7 @@ FROM node:9.11.1 as nodebuilder
 COPY docker/dev/docker-entrypoint-node.sh /docker-entrypoint-node.sh
 COPY . /app
 
-WORKDIR /app/angelman/rdrf/rdrf/frontend
+WORKDIR /app/rdrf/rdrf/rdrf/frontend
 
 RUN /docker-entrypoint-node.sh build
 
