@@ -48,14 +48,14 @@ function wait_for_services {
     if [[ "$WAIT_FOR_CLINICAL_DB" ]] ; then
         dockerwait "$CLINICAL_DBSERVER" "$CLINICAL_DBPORT"
     fi
+    if [[ "$WAIT_FOR_REPORTING_DB" ]] ; then
+        dockerwait "$REPORTING_DBSERVER" "$REPORTING_DBPORT"
+    fi
     if [[ "$WAIT_FOR_CACHE" ]] ; then
         dockerwait "$CACHESERVER" "$CACHEPORT"
     fi
     if [[ "$WAIT_FOR_RUNSERVER" ]] ; then
         dockerwait "$RUNSERVER" "$RUNSERVERPORT"
-    fi
-    if [[ "$WAIT_FOR_HOST_PORT" ]]; then
-        dockerwait "$DOCKER_ROUTE" "$WAIT_FOR_HOST_PORT"
     fi
     if [[ "$WAIT_FOR_UWSGI" ]] ; then
         dockerwait "$UWSGISERVER" "$UWSGIPORT"
@@ -76,7 +76,11 @@ function defaults {
     : "${CLINICAL_DBNAME:=${CLINICAL_DBUSER}}"
     : "${CLINICAL_DBPASS:=${CLINICAL_DBUSER}}"
 
-    : "${DOCKER_ROUTE:=$(/sbin/ip route|awk '/default/ { print $3 }')}"
+    : "${REPORTING_DBSERVER:=reportingdb}"
+    : "${REPORTING_DBPORT:=5432}"
+    : "${REPORTING_DBUSER:=webapp}"
+    : "${REPORTING_DBNAME:=${REPORTING_DBUSER}}"
+    : "${REPORTING_DBPASS:=${REPORTING_DBUSER}}"
 
     : "${UWSGISERVER:=uwsgi}"
     : "${UWSGIPORT:=9000}"
@@ -101,8 +105,9 @@ function defaults {
 
     : "${DJANGO_FIXTURES:=none}"
 
-    export DBSERVER DBPORT DBUSER DBNAME DBPASS MEMCACHE DOCKER_ROUTE
+    export DBSERVER DBPORT DBUSER DBNAME DBPASS MEMCACHE
     export CLINICAL_DBSERVER CLINICAL_DBPORT CLINICAL_DBUSER CLINICAL_DBNAME CLINICAL_DBPASS
+    export REPORTING_DBSERVER REPORTING_DBPORT REPORTING_DBUSER REPORTING_DBNAME REPORTING_DBPASS
     export TEST_APP_URL TEST_APP_SCHEME TEST_APP_HOST TEST_APP_PORT TEST_APP_PATH TEST_BROWSER TEST_WAIT TEST_SELENIUM_HUB
     export DJANGO_FIXTURES
 }
@@ -207,7 +212,8 @@ if [ "$1" = 'uwsgi' ]; then
     _django_check_deploy
 
     set -x
-    exec uwsgi --die-on-term --ini "${UWSGI_OPTS}"
+    # exec uwsgi --die-on-term --ini "${UWSGI_OPTS}"
+    exec uwsgi --http :9000 --wsgi-file /app/uwsgi/django.wsgi --static-map /static=/data/static
 fi
 
 # local and test uwsgi entrypoint
@@ -255,21 +261,21 @@ if [ "$1" = 'runtests' ]; then
     export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE}"_test
 
     set -x
-    exec django-admin.py test --noinput -v 3 rdrf
-fi
+    single_test="$2"
 
-# aloe RDRF entrypoint
-if [ "$1" = 'aloe_rdrf' ]; then
-    echo "[Run] Starting RDRF aloe"
-    cd /app/rdrf/rdrf/rdrf/testing/behaviour
-    _aloe "$@"
-fi
+    if [ "$single_test" != "" ]; then
+	exec django-admin.py test --noinput -v 3 "$single_test"
 
+    else
+	exec django-admin.py test --noinput -v 3 rdrf
+    fi
+fi
 
 # aloe entrypoint
 if [ "$1" = 'aloe' ]; then
     info "[Run] Starting aloe"
-    cd /app/"${PROJECT_NAME}" || exit
+    cd /app/rdrf/rdrf/rdrf/testing/behaviour || exit
+
     _aloe "$@"
 fi
 

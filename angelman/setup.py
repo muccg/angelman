@@ -10,6 +10,7 @@ def add_file_for_package(package, subdir, f):
     # print "%s: %s" % (package, full_path)
     return full_path
 
+
 packages = [
     'angelman',
 ]
@@ -38,13 +39,12 @@ for package in ['angelman']:
     os.chdir(start_dir)
 
 
-setup(name='django-angelman',
-      version="4.1.24",
+setup(name='ereasearchqut-angelman',
+      version="1.0.0",
       packages=packages,
-      description='RDRF',
-      long_description='Rare Disease Registry Framework',
-      author='Centre for Comparative Genomics',
-      author_email='rdrf@ccg.murdoch.edu.au',
+      description='TRRF Angelman',
+      long_description='Trial Ready Registry Framework - Angelman',
+      author='Queensland University of Technology - eResearch',
       package_data=package_data,
       zip_safe=False,
       )

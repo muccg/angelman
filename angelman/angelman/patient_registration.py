@@ -1,15 +1,15 @@
-from registry.groups.patient_registration.base import BaseRegistration
-from rdrf.services.io.notifications.email_notification import process_notification
-from rdrf.events.events import EventType
-from registration.models import RegistrationProfile
-from registry.patients.models import ParentGuardian
-from registry.patients.models import Patient
-from registry.patients.models import PatientAddress
-from registry.groups.models import WorkingGroup
-from rdrf.models.workflow_models import ClinicianSignupRequest
-from django.conf import settings
-
 import logging
+
+from rdrf.events.events import EventType
+from rdrf.services.io.notifications.email_notification import process_notification
+from rdrf.models.workflow_models import ClinicianSignupRequest
+
+from registry.groups.patient_registration.base import BaseRegistration
+from registration.models import RegistrationProfile
+from registry.patients.models import ParentGuardian, Patient, PatientAddress
+from registry.groups.models import WorkingGroup
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +28,6 @@ class AngelmanRegistration(BaseRegistration, object):
         else:
             self.clinician_signup = None
 
-
     def _do_clinician_signup(self, registry_model):
         from rdrf.helpers.utils import get_site
         user = self._create_django_user(self.request,
@@ -36,7 +35,6 @@ class AngelmanRegistration(BaseRegistration, object):
                                         registry_model,
                                         is_parent=False,
                                         is_clinician=True)
-
 
         logger.debug("created django user for clinician")
 
@@ -56,20 +54,18 @@ class AngelmanRegistration(BaseRegistration, object):
         logger.debug("made this clinician the clinician of the patient")
 
         site_url = get_site()
-        
+
         activation_template_data = {
-            "site_url":  site_url,
+            "site_url": site_url,
             "clinician_email": self.clinician_signup.clinician_email,
             "clinician_lastname": self.clinician_signup.clinician_other.clinician_last_name,
             "registration": RegistrationProfile.objects.get(user=user)
         }
-        
+
         process_notification(registry_model.code,
                              EventType.CLINICIAN_ACTIVATION,
                              activation_template_data)
         logger.debug("AngelmanRegistration process - sent activation link for registered clinician")
-
-
 
     def process(self):
         registry_code = self.request.POST['registry_code']
@@ -112,7 +108,7 @@ class AngelmanRegistration(BaseRegistration, object):
         logger.debug("AngelmanRegistration process - created patient address")
 
         parent_guardian = self._create_parent(self.request)
-        
+
         parent_guardian.patient.add(patient)
         parent_guardian.user = user
         parent_guardian.save()
@@ -148,7 +144,7 @@ class AngelmanRegistration(BaseRegistration, object):
         address = PatientAddress.objects.create(
             patient=patient,
             address_type=self.get_address_type(address_type),
-            address= request.POST["parent_guardian_address"] if same_address else request.POST["address"],
+            address=request.POST["parent_guardian_address"] if same_address else request.POST["address"],
             suburb=request.POST["parent_guardian_suburb"] if same_address else request.POST["suburb"],
             state=request.POST["parent_guardian_state"] if same_address else request.POST["state"],
             postcode=request.POST["parent_guardian_postcode"] if same_address else request.POST["postcode"],

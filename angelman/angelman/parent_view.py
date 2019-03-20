@@ -8,26 +8,14 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 
-from registry.patients.models import AddressType
-from registry.patients.models import ConsentValue
-from registry.patients.models import ParentGuardian
-from registry.patients.models import Patient
-from registry.patients.models import PatientAddress
-from registry.patients.models import ClinicianOther
-from rdrf.models.definition.models import ConsentQuestion
-from rdrf.models.definition.models import ConsentSection
-from rdrf.models.definition.models import Registry
-from rdrf.models.definition.models import RegistryForm
+from registry.groups.models import WorkingGroup
 from registry.patients.admin_forms import ParentGuardianForm
-from rdrf.helpers.utils import consent_status_for_patient
-from rdrf.forms.progress import form_progress
-
-from rdrf.helpers.utils import consent_status_for_patient
+from registry.patients.models import AddressType, ParentGuardian, Patient, PatientAddress
 
 from rdrf.db.contexts_api import RDRFContextManager, RDRFContextError
-
-from registry.groups.models import WorkingGroup
-import logging
+from rdrf.forms.progress import form_progress
+from rdrf.helpers.utils import consent_status_for_patient
+from rdrf.models.definition.models import Registry, RegistryForm
 
 
 logger = logging.getLogger("registry_log")
@@ -87,7 +75,7 @@ class BaseParentView(LoginRequiredMixin, View):
                 else:
                     self.rdrf_context = self.rdrf_context_manager.get_or_create_default_context(patient_model)
             else:
-                    self.rdrf_context = self.rdrf_context_manager.get_context(context_id, patient_model)
+                self.rdrf_context = self.rdrf_context_manager.get_context(context_id, patient_model)
 
             if self.rdrf_context is None:
                 raise RDRFContextSwitchError
@@ -140,7 +128,6 @@ class ParentView(BaseParentView):
                     "forms": forms
                 })
 
-
             context['parent'] = parent
             context['patients'] = patients
             context['registry_code'] = registry_code
@@ -187,10 +174,10 @@ class ParentView(BaseParentView):
         # patient based on the working group of the first registered patient
         registered_patient_working_group = None
         for p in parent.patient.all():
-         wg = p.working_groups.first()
-         if wg:
-             registered_patient_working_group = wg
-             break
+            wg = p.working_groups.first()
+            if wg:
+                registered_patient_working_group = wg
+                break
 
         if registered_patient_working_group:
             patient.working_groups.add(registered_patient_working_group)
@@ -231,7 +218,6 @@ class ParentEditView(BaseParentView):
             messages.add_message(request, messages.SUCCESS, "Details saved")
         else:
             messages.add_message(request, messages.ERROR, "Please correct the errors bellow")
-
 
         context['parent'] = parent
         context['registry_code'] = registry_code

@@ -16,3 +16,5 @@ docker-compose*
 develop.sh
 lib.sh
 *.mongo
+**/node_modules
+**/yarn_cache

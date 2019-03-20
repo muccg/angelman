@@ -1,3 +1,6 @@
+# flake8: noqa
+import os
+
 from rdrf.settings import *
 
 # Insert fkrp before rdrf and the rest of apps. This ensures templates
@@ -14,7 +17,7 @@ INSTALLED_APPS = [
 ANGELMAN_WEBAPP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES[0]['DIRS'] = [
     os.path.join(ANGELMAN_WEBAPP_ROOT, FALLBACK_REGISTRY_CODE, 'templates'),
-] + TEMPLATES[0]['DIRS']
+    ] + TEMPLATES[0]['DIRS']
 
 ROOT_URLCONF = '%s.urls' % FALLBACK_REGISTRY_CODE
 
@@ -26,7 +29,6 @@ RECAPTCHA_SECRET_KEY = env.get("recaptcha_secret_key", "")
 
 PROJECT_TITLE = "Global Angelman Syndrome Registry"
 PROJECT_TITLE_LINK = "login_router"
-
 
 
 # Registration

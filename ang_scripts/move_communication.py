@@ -1,14 +1,18 @@
+from copy import deepcopy
+from datetime import datetime
+import json
+import sys
+import traceback
+
 import django
-django.setup()
-from registry.patients.models import Patient
+from django.db import transaction
+
 from rdrf.models.definition.models import ClinicalData
 from rdrf.models.definition.models import Registry
-import sys
-import json
-import traceback
-from datetime import datetime
-from copy import deepcopy
-from django.db import transaction
+from registry.patients.models import Patient
+
+
+django.setup()
 
 
 OLD_FORM = "AngelmanRegistryBehaviourAndDevelopment"
@@ -18,6 +22,7 @@ SPEECH_SECTION = "ANGBEHDEVSPEECHLANGUAGE"
 COMM_SECTION = "ANGBEHDEVCOMMUNICATION"
 SECTIONS = [SPEECH_SECTION, COMM_SECTION]
 
+
 class Stats:
     errors = 0
     ids_processed = []
@@ -26,9 +31,6 @@ class Stats:
 
 class NoData(Exception):
     pass
-
-
-    
 
 
 class Logger:
@@ -210,7 +212,6 @@ def check_registry(reg):
 
     if COMM_SECTION not in section_codes:
         raise Exception("comm section %s not present" % COMM_SECTION)
-        
 
 
 def run(dry_run=True):
@@ -237,7 +238,7 @@ if __name__ == '__main__':
     dry_run = True
     try:
         dry_run = sys.argv[1] != "real"
-    except:
+    except Exception:
         pass
 
     if not dry_run:
@@ -253,7 +254,7 @@ if __name__ == '__main__':
         total_processed = len(Stats.ids_processed)
         print("stats total processed = %s" % total_processed)
         print("stats total skipped = %s" % total_skipped)
-        
+
     except Exception as ex:
         print("run failed ! ( rolled back): %s" % ex)
-        print("Traceback:\n %s" %traceback.format_exc())
+        print("Traceback:\n %s" % traceback.format_exc())
