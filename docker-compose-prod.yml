@@ -37,6 +37,7 @@ services:
     image: eresearchqut/angelman:${ANGELMAN_VERSION}
     command: uwsgi
     environment:
+      - APP_VERSION=${ANGELMAN_VERSION} (ang)
       - PRODUCTION=1
       - DEBUG=0
       - WAIT_FOR_DB=1
