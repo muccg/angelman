@@ -2,6 +2,7 @@
 import os
 
 from rdrf.settings import *
+import angelman
 
 # Insert fkrp before rdrf and the rest of apps. This ensures templates
 # and translations of fkrp get loaded first.
@@ -49,3 +50,4 @@ AUTH_PASSWORD_VALIDATORS = [{
     },
 ]
 
+VERSION = env.get('app_version', '%s (ang)' % angelman.VERSION)
