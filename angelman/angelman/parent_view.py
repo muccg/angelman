@@ -106,13 +106,15 @@ class ParentView(BaseParentView):
             patients_objects = parent.patient.all()
             patients = []
 
-            forms_objects = RegistryForm.objects.filter(registry=registry).order_by('position')
+            forms_objects = RegistryForm.objects.filter(registry=registry).exclude(is_questionnaire=True).order_by('position')
 
             progress = form_progress.FormProgress(registry)
 
             for patient in patients_objects:
                 forms = []
                 for form in forms_objects:
+                    if form.is_questionnaire or not request.user.can_view(form):
+                        continue
                     forms.append({
                         "form": form,
                         "progress": progress.get_form_progress(form, patient),
