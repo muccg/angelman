@@ -1,4 +1,4 @@
 [submodule "rdrf"]
   path = rdrf
-  url = ssh://git@github.com/eresearchqut/trrf.git
+  url = ../trrf.git
   branch = next_release
