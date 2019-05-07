@@ -1,1 +1,72 @@
-rdrf/buildspec.yml
+# DON'T MODIFY! Just copy verbatim from the trrf repository to keep it DRY.
+# cp rdrf/buildspec.yml .
+#
+# If it needs to change in the future remove this comment.
+#
+# Unfortunately we can't link the file, because CodeBuild needs it to be there to run
+# but when CodeBuild runs the submodules aren't fetched yet.
+version: 0.2
+
+phases:
+  install:
+    commands:
+      #- printenv
+
+      # CodePipeline has no support for git submodules:
+      #
+      # https://forums.aws.amazon.com/thread.jspa?threadID=248267
+      #
+      # Using a simplified version of solutions on
+      #
+      # https://stackoverflow.com/questions/42712542/how-to-auto-deploying-git-repositories-with-submodules-on-aws/
+      #
+      # to fetch submodules. It can be simplified, because our GitHub repositories are public, so we don't need to
+      # set up SSH.
+      - |
+        if [ -f .gitmodules ]; then
+          echo "Project has git submodules."
+          echo "Manual workaround to help CodePipeline fetch git submodules."
+          git init
+          git remote add origin "$GITHUB_CLONE_URL"
+          git fetch
+          git checkout -f "$CODEBUILD_RESOLVED_SOURCE_VERSION"
+          git submodule update --init --recursive
+        fi
+  pre_build:
+    commands:
+      #- echo Installing dependencies
+      #- apt-get update
+      #- apt-get install jq moreutils -y
+      #- pip3 install yq
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - echo Build started on `date`
+
+      # CodePipeline loses the file permissions while copying artifacts
+      # https://docs.aws.amazon.com/codepipeline/latest/userguide/troubleshooting.html#troubleshooting-file-permissions
+      - chmod +x scripts/*.sh
+      - chmod +x docker/dev/*.sh
+      - chmod +x rdrf/rdrf/scripts/check-calculation.js
+
+      - docker-compose build
+      - echo Running tests...
+      - scripts/lint.sh
+      - scripts/check-migrations.sh
+      - scripts/unit-tests.sh
+      - scripts/end2end-tests.sh
+      - echo Building and tagging the Docker image...
+      - docker build -f docker/production/Dockerfile -t $IMAGE_REPO:$APPLICATION_VERSION .
+
+      # docker push used to be in post_build, but post_build is executed even on build failure.
+      # We don't want to push the docker image if the build failed for any reason, so we can't do the docker push in post_build.
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $IMAGE_REPO:$APPLICATION_VERSION
+
+artifacts:
+  files:
+    - '*'
+    - 'docker/**/*'
+    - 'scripts/**/*'
