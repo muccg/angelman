@@ -103,7 +103,7 @@ function defaults {
     : "${TEST_WAIT:=30}"
     : "${TEST_SELENIUM_HUB:=http://hub:4444/wd/hub}"
 
-    : "${DJANGO_FIXTURES:=none}"
+    : "${DJANGO_FIXTURES:=""}"
 
     export DBSERVER DBPORT DBUSER DBNAME DBPASS MEMCACHE
     export CLINICAL_DBSERVER CLINICAL_DBPORT CLINICAL_DBUSER CLINICAL_DBNAME CLINICAL_DBPASS
@@ -139,47 +139,18 @@ function _django_collectstatic {
 }
 
 
-function _django_test_fixtures {
-    info 'loading test (iprestrict permissive) fixture'
-    set -x
-    django-admin.py init iprestrict_permissive
-    django-admin.py reload_rules
-    set +x
-}
-
-
-function _django_dev_fixtures {
-    info "loading DEV fixture"
-    set -x
-    django-admin.py init DEV
-    django-admin.py reload_rules
-    set +x
-}
-
-
-function _rdrf_import_grdr {
-    info "importing grdr registry"
-    set -x
-    django-admin.py import_registry --file=/app/grdr.yaml
-    set +x
-}
-
-
 function _django_fixtures {
-    if [ "${DJANGO_FIXTURES}" = 'test' ]; then
-        _django_test_fixtures
-    fi
-
-    if [ "${DJANGO_FIXTURES}" = 'dev' ]; then
-        _django_dev_fixtures
-    fi
+    info "loading fixtures ${DJANGO_FIXTURES}"
+    set -x
+    django-admin.py init ${DJANGO_FIXTURES}
+    django-admin.py reload_rules
+    set +x
 }
 
 
 function _runserver() {
     : "${RUNSERVER_OPTS=${RUNSERVER_CMD} 0.0.0.0:${RUNSERVERPORT} --settings=${DJANGO_SETTINGS_MODULE}}"
 
-    _django_collectstatic
     _django_migrate
     _django_fixtures
 
@@ -207,26 +178,11 @@ wait_for_services
 if [ "$1" = 'uwsgi' ]; then
     info "[Run] Starting prod uwsgi"
 
-    _django_collectstatic
-    _django_migrate
     _django_check_deploy
 
     set -x
     # exec uwsgi --die-on-term --ini "${UWSGI_OPTS}"
     exec uwsgi --http :9000 --wsgi-file /app/uwsgi/django.wsgi --static-map /static=/data/static
-fi
-
-# local and test uwsgi entrypoint
-if [ "$1" = 'uwsgi_local' ]; then
-    info "[Run] Starting local uwsgi"
-
-    _django_collectstatic
-    _django_migrate
-    _django_fixtures
-    _django_check_deploy
-
-    set -x
-    exec uwsgi --die-on-term --ini "${UWSGI_OPTS}"
 fi
 
 # runserver entrypoint
@@ -242,19 +198,6 @@ if [ "$1" = 'runserver_plus' ]; then
     _runserver
 fi
 
-# grdr entrypoint
-if [ "$1" = 'grdr' ]; then
-    info "[Run] Starting runserver_plus with GRDR data elements"
-
-    _django_collectstatic
-    _django_migrate
-    _django_fixtures
-    _rdrf_import_grdr
-
-    RUNSERVER_CMD=runserver_plus
-    _runserver
-fi
-
 # runtests entrypoint
 if [ "$1" = 'runtests' ]; then
     info "[Run] Starting tests"
@@ -264,10 +207,9 @@ if [ "$1" = 'runtests' ]; then
     single_test="$2"
 
     if [ "$single_test" != "" ]; then
-	exec django-admin.py test --noinput -v 3 "$single_test"
-
+        exec django-admin.py test --noinput -v 3 "$single_test"
     else
-	exec django-admin.py test --noinput -v 3 rdrf
+        exec django-admin.py test --noinput -v 3 rdrf
     fi
 fi
 
@@ -275,11 +217,17 @@ fi
 if [ "$1" = 'aloe' ]; then
     info "[Run] Starting aloe"
     cd /app/rdrf/rdrf/rdrf/testing/behaviour || exit
-
     _aloe "$@"
 fi
 
-warn "[RUN]: Builtin command not provided [tarball|aloe|runtests|runserver|runserver_plus|uwsgi|uwsgi_local]"
+# db_init entrypoint
+if [ "$1" = 'db_init' ]; then
+    info "[Run] Initialising the DB with data"
+    _django_fixtures
+    exit
+fi
+
+warn "[RUN]: Builtin command not provided [tarball|aloe|runtests|runserver|runserver_plus|uwsgi|uwsgi_local|db_init]"
 info "[RUN]: $*"
 
 set -x
