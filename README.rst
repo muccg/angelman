@@ -27,6 +27,10 @@ You will have to set up Docker on your development machine.
 
 Other development dependencies are Python 2 and virtualenv_.
 
+When cloning don't forget to install the rdrf submodule. To manually install sub modules after cloning, run:
+
+    git submodule update --init --recursive
+
 All the development tasks can be done by using the ``develop.sh`` shell script in this directory.
 Please run it without any arguments for help on its usage.
 
