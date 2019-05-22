@@ -39,7 +39,7 @@ for package in ['angelman']:
     os.chdir(start_dir)
 
 
-setup(name='ereasearchqut-angelman',
+setup(name='eresearchqut-angelman',
       version="1.0.0",
       packages=packages,
       description='TRRF Angelman',
