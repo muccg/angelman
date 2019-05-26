@@ -71,4 +71,5 @@ artifacts:
   files:
     - '*'
     - 'docker/**/*'
+    - 'docker/production/envs/*'
     - 'scripts/**/*'
