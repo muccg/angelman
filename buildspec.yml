@@ -69,7 +69,6 @@ phases:
 
 artifacts:
   files:
-    - '**/*'
-    #- 'docker/**/*'
-    #- 'docker/production/envs/*'
-    #- 'scripts/**/*'
+    - '*'
+    - 'docker/**/*'
+    - 'scripts/**/*'
