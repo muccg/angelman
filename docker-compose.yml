@@ -36,7 +36,7 @@ services:
   node:
     image: muccg/rdrf-node
     command: "watch"
-    working_dir: /app/rdrf//rdrf/rdrf/frontend
+    working_dir: /app/rdrf/rdrf/rdrf/frontend
     environment:
         YARN_CACHE_FOLDER: /opt/yarn_cache
     volumes:
