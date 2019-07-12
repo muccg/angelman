@@ -28,22 +28,21 @@ PROJECT_TITLE = "Global Angelman Syndrome Registry"
 PROJECT_TITLE_LINK = "login_router"
 
 
-
 # Registration
 REGISTRATION_CLASS = "angelman.patient_registration.AngelmanRegistration"
 
+PROMS_TEMPLATE = "surveys/survey.html"
 
 # For now keep MTM password validation same as on front end
 # at least 6 chars
 # has a number
 AUTH_PASSWORD_VALIDATORS = [{
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
+    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    'OPTIONS': {
             'min_length': 6,
-        }
-    },
+    }
+},
     {
         'NAME': 'rdrf.auth.password_validation.HasNumberValidator',
-    },
+},
 ]
-

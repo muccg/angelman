@@ -33,3 +33,4 @@ startup
 *.mo
 *.po
 .env
+yarn_cache
