@@ -181,7 +181,6 @@
 <body>
     <div class="container">
         <br>
-    
         {% if form.errors %}
         <div class="alert alert-danger">
             {% for field in form %}
@@ -212,9 +211,14 @@
         </div>
 
         <!-- Registry specific registration form -->
-        {% with "registration/registration_form_"|add:registry_code|add:".html" as template_name %}
-            {% include template_name %}
-        {% endwith %}
+        {% ifequal registry_code "ang" %}
+            {% include "registration/registration_form_ang.html" %}
+        {% else %}
+            This page does not exist or has been moved. Please alert the person/organisation who gave you this page URL to let them know.
+            <br/>
+            <br/>
+            Go to the correct <a href="{% url 'registration_register' 'ang' %}">Angelman Parent Registration page</a>.
+        {% endifequal %}
  
     </div>
 
