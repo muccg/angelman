@@ -191,16 +191,6 @@
         </div>
         {% endif %}
 
-        
-        {% if form.errors %}
-        <div class="alert alert-danger">
-            {% for field in form %}
-                {% if field.errors %}
-                    <p><strong>{{field.label}}</strong> - {{ field.errors|striptags }}</p>
-                {% endif %}
-            {% endfor %}
-        </div>
-        {% endif %}
         <h3>
             <strong>{% trans "Angelman Registry - Parent Registration" %}</strong>
         </h3>
