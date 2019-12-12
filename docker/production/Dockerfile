@@ -1,6 +1,5 @@
 # Container to build our prod image
-# TODO upgrade to 3.7 (both here and main image below)
-FROM python:3.6 as builder
+FROM python:3.8.0 as builder
 
 ENV PYTHONUNBUFFERED 1
 
@@ -51,7 +50,7 @@ WORKDIR /app/rdrf/rdrf/rdrf/frontend
 RUN /docker-entrypoint-node.sh build
 
 # Actual image we are building
-FROM python:3.6-slim
+FROM python:3.8.0-slim
 
 ENV PYTHONUNBUFFERED 1
 
@@ -86,6 +85,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   mime-support \
   nodejs \
   unixodbc \
+  ssl-cert \
   && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir -p /requirements/rdrf/
@@ -97,6 +97,13 @@ COPY --from=builder /requirements/rdrf/requirements.txt rdrf/
 
 RUN pip install -r rdrf/requirements.txt
 RUN pip install -r requirements.txt
+
+# The generate snakeoil cert is valid for 10 years, but if you need to
+# re-generate it you can use:
+# RUN make-ssl-cert generate-default-snakeoil --force-overwrite
+
+RUN chgrp -R django /etc/ssl/private/ \
+  && chmod g+r /etc/ssl/private/ssl-cert-snakeoil.key
 
 RUN rm -Rf /root/.cache
 
