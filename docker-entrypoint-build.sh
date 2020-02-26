@@ -7,43 +7,65 @@ info () {
 trap exit SIGHUP SIGINT SIGTERM
 env | grep -iv PASS | sort
 
-# prepare a tarball of build
-if [ "$1" = 'releasetarball' ]; then
-    echo "[Run] Preparing a release tarball"
+if [ "$1" = 'checkout' ]; then
+    info "[Run] checkout"
+    info "[Run] Clone the source code"
     info "BUILD_VERSION ${BUILD_VERSION}"
+    info "PROJECT_SOURCE ${PROJECT_SOURCE}"
 
     set -e
-    cd /app
-    rm -rf /app/*
+    rm -rf "/data/app/"
+    mkdir "/data/app/"
+
+    # clone and install the app
     set -x
+    cd /data/app
     git clone --depth=1 --branch="${GIT_BRANCH}" "${PROJECT_SOURCE}" .
     git rev-parse HEAD > .version
+    cat .version
+    exit 0
+fi
 
-    # Note: Environment vars are used to control the behaviour of pip (use local devpi for instance)
-    pip install --upgrade -r "${PROJECT_NAME}"/runtime-requirements.txt
-    pip install -e "${PROJECT_NAME}"
+
+# prepare a tarball of build
+if [ "$1" = 'releasetarball' ]; then
+    info "[Run] Preparing a release tarball"
+    info "BUILD_VERSION ${BUILD_VERSION}"
+    info "PROJECT_SOURCE ${PROJECT_SOURCE}"
+	cd /data/app
+	
+    pip install --upgrade "setuptools>=36.0.0,<=37.0.0"
+	
+    #pip install -e "${PROJECT_NAME}"
+    cd "${PROJECT_NAME}" && pip install .
+
     set +x
-
+	
+	cd /data
+    rm -rf env
+    cp -rp /env .
     # vars for creating release tarball
-    ARTIFACTS="/env
-               /app/docker-entrypoint.sh
-               /app/uwsgi
-               /app/${PROJECT_NAME}"
+    ARTIFACTS="env
+               app/docker-entrypoint.sh
+               app/uwsgi
+               app/scripts
+               app/${PROJECT_NAME}"
     TARBALL="/data/${PROJECT_NAME}-${BUILD_VERSION}.tar"
     # shellcheck disable=SC2037
     TAR_OPTS="--exclude-vcs
+              --exclude=app/rdrf/rdrf/frontend/*
               --verify
               --checkpoint=1000
               --checkpoint-action=dot
               --create
               --preserve-permissions"
- 
+
     info "ARTIFACTS ${ARTIFACTS}"
     info "TARBALL ${TARBALL}"
- 
+
     # create tar from / so relative and absolute paths are identical
     # allows archive verification to work
-    cd /
+    
     set -x
     # shellcheck disable=SC2086
     rm -f "${TARBALL}" && tar ${TAR_OPTS} -f "${TARBALL}" ${ARTIFACTS}
@@ -54,7 +76,7 @@ if [ "$1" = 'releasetarball' ]; then
     exit 0
 fi
 
-echo "[RUN]: Builtin command not provided [releasetarball]"
-echo "[RUN]: $*"
+info "[RUN]: Builtin command not provided [checkout|releasetarball]"
+info "[RUN]: $*"
 
 exec "$@"
